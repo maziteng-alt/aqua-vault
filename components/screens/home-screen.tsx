@@ -38,18 +38,7 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       </div>
 
       {/* Hydration Hero Card */}
-      <div className="p-5 relative overflow-hidden"
-        style={{
-          background: 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          boxShadow: `
-            0 4px 16px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9)
-          `
-        }}>
+      <div className="p-5 relative overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
         {/* Subtle tinted top strip */}
         <div className="absolute top-0 left-0 right-0 h-1 rounded-t-[1.25rem]"
           style={{ background: 'linear-gradient(90deg, #3b82f6, #06b6d4)' }} />
@@ -215,23 +204,10 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
             key={a.label}
             onClick={a.onClick}
             className="relative p-4 flex flex-col items-center gap-3 active:scale-95 transition-all duration-300"
-            style={{
-              background: a.bg,
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              border: `1px solid ${a.border}`,
-              boxShadow: `
-                0 4px 16px rgba(0, 0, 0, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9)
-              `
-            }}
+            style={{ background: a.bg, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: `1px solid ${a.border}`, boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}
           >
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-              style={{
-                background: 'rgba(255, 255, 255, 0.8)',
-                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)'
-              }}>
+              style={{ background: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)' }}>
               <a.icon size={22} style={{ color: a.color }} />
             </div>
             <span className="text-xs font-semibold text-center" style={{ color: a.color }}>{a.label}</span>
@@ -240,18 +216,7 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       </div>
 
       {/* AI Insight */}
-      <div className="p-4 relative overflow-hidden"
-        style={{
-          background: 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          boxShadow: `
-            0 4px 16px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9)
-          `
-        }}>
+      <div className="p-4 relative overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center flex-shrink-0 shadow-sm"
             style={{ backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
@@ -282,27 +247,14 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
         </div>
         <div className="flex flex-col gap-3">
           {recentDrinks.map(drink => (
-            <div key={drink.id} className="px-4 py-3.5 flex items-center gap-4"
-              style={{
-                background: 'rgba(255, 255, 255, 0.5)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.4)',
-              boxShadow: `
-                0 4px 16px rgba(0, 0, 0, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9)
-              `
-            }>
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
+            <div key={drink.id} className="px-4 py-3.5 flex items-center gap-4" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
                 {drink.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="text-sm font-bold text-foreground truncate">{drink.name}</p>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
-                    style={{ background: 'rgba(255, 255, 255, 0.8)', color: drink.accent, backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.8)', color: drink.accent, backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
                     {drink.category}
                   </span>
                 </div>
@@ -329,17 +281,7 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
           {favCups.map(cup => (
             <div key={cup.id}
               className="flex-shrink-0 p-4 flex flex-col items-center gap-2.5 w-28 cursor-pointer active:scale-95 transition-transform"
-              style={{
-                background: 'rgba(255, 255, 255, 0.5)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.4)',
-              boxShadow: `
-                0 4px 16px rgba(0, 0, 0, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9)
-              `
-            }}>
+              style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
                 style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
                 {cup.icon}
