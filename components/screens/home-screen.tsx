@@ -196,9 +196,9 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       {/* Quick Actions */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "扫描包装", icon: Camera,     bg: "rgba(255, 255, 255, 0.7)", color: "#3b82f6", border: "rgba(255, 255, 255, 0.5)", onClick: onScanClick },
-          { label: "选择杯子", icon: GlassWater,  bg: "rgba(255, 255, 255, 0.7)", color: "#06b6d4", border: "rgba(255, 255, 255, 0.5)", onClick: onViewCupsClick },
-          { label: "手动添加", icon: PenLine,     bg: "rgba(255, 255, 255, 0.7)", color: "#a855f7", border: "rgba(255, 255, 255, 0.5)", onClick: onAddClick },
+          { label: "扫描包装", icon: Camera,     bg: "rgba(255, 255, 255, 0.5)", color: "#3b82f6", border: "rgba(255, 255, 255, 0.4)", onClick: onScanClick },
+          { label: "选择杯子", icon: GlassWater,  bg: "rgba(255, 255, 255, 0.5)", color: "#06b6d4", border: "rgba(255, 255, 255, 0.4)", onClick: onViewCupsClick },
+          { label: "手动添加", icon: PenLine,     bg: "rgba(255, 255, 255, 0.5)", color: "#a855f7", border: "rgba(255, 255, 255, 0.4)", onClick: onAddClick },
         ].map(a => (
           <button
             key={a.label}
