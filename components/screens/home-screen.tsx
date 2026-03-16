@@ -196,20 +196,39 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       {/* Quick Actions */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "扫描包装", icon: Camera,     bg: "#eff6ff", color: "#3b82f6", shadow: "rgba(59,130,246,0.2)",  onClick: onScanClick },
-          { label: "选择杯子", icon: GlassWater,  bg: "#f0fdf4", color: "#06b6d4", shadow: "rgba(6,182,212,0.2)",  onClick: onViewCupsClick },
-          { label: "手动添加", icon: PenLine,     bg: "#fdf4ff", color: "#a855f7", shadow: "rgba(168,85,247,0.2)",  onClick: onAddClick },
+          { label: "扫描包装", icon: Camera,     bg: "rgba(59, 130, 246, 0.15)", color: "#3b82f6", border: "rgba(59, 130, 246, 0.3)", glow: "rgba(59, 130, 246, 0.4)", onClick: onScanClick },
+          { label: "选择杯子", icon: GlassWater,  bg: "rgba(6, 182, 212, 0.15)", color: "#06b6d4", border: "rgba(6, 182, 212, 0.3)", glow: "rgba(6, 182, 212, 0.4)", onClick: onViewCupsClick },
+          { label: "手动添加", icon: PenLine,     bg: "rgba(168, 85, 247, 0.15)", color: "#a855f7", border: "rgba(168, 85, 247, 0.3)", glow: "rgba(168, 85, 247, 0.4)", onClick: onAddClick },
         ].map(a => (
           <button
             key={a.label}
             onClick={a.onClick}
-            className="bright-card p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform"
+            className="relative p-4 flex flex-col items-center gap-3 active:scale-95 transition-all duration-300"
+            style={{
+              background: a.bg,
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              border: `1px solid ${a.border}`,
+              boxShadow: `
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05),
+                0 0 20px ${a.glow}
+              `
+            }}
           >
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-              style={{ background: a.bg, boxShadow: `0 4px 12px ${a.shadow}` }}>
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 100%)',
+                boxShadow: `
+                  0 2px 8px rgba(0, 0, 0, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.9)
+                `
+              }}>
               <a.icon size={22} style={{ color: a.color }} />
             </div>
-            <span className="text-xs font-semibold text-slate-600 text-center">{a.label}</span>
+            <span className="text-xs font-semibold text-center" style={{ color: a.color }}>{a.label}</span>
           </button>
         ))}
       </div>
