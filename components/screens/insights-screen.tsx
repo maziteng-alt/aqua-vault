@@ -90,7 +90,7 @@ export function InsightsScreen() {
       </div>
 
       {/* Today's Goals */}
-      <div className="bright-card p-5">
+      <div className="p-5" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">今日目标达成</p>
         <div className="flex items-center justify-around">
           {radialGoals.map(d => (
@@ -140,7 +140,7 @@ export function InsightsScreen() {
       </div>
 
       {/* Water Chart */}
-      <div className="bright-card p-5">
+      <div className="p-5" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-bold text-foreground">本周饮水量</p>
@@ -169,7 +169,7 @@ export function InsightsScreen() {
       </div>
 
       {/* Caffeine Chart */}
-      <div className="bright-card p-5">
+      <div className="p-5" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-bold text-foreground">本周咖啡因</p>
@@ -198,7 +198,7 @@ export function InsightsScreen() {
       </div>
 
       {/* Pie Chart */}
-      <div className="bright-card p-5">
+      <div className="p-5" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
         <p className="text-sm font-bold text-foreground mb-4">饮品类别分布</p>
         <div className="flex items-center gap-5">
           <PieChart width={100} height={100}>
@@ -229,8 +229,8 @@ export function InsightsScreen() {
         <div className="flex flex-col gap-3">
           {aiInsights.map((ins, i) => (
             <div key={i}
-              className="bright-card p-4 relative overflow-hidden"
-              style={{ background: ins.bg, borderColor: ins.border }}>
+              className="p-4 relative overflow-hidden"
+              style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
               <div className="absolute top-4 right-4">
                 <span className="text-[10px] px-2.5 py-1 rounded-full font-bold"
                   style={{ background: ins.tagBg, color: ins.tagColor }}>
@@ -252,7 +252,7 @@ export function InsightsScreen() {
       </div>
 
       {/* Top cups */}
-      <div className="bright-card p-5">
+      <div className="p-5" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
         <p className="text-sm font-bold text-foreground mb-4">最常用杯子 TOP 3</p>
         {[
           { name: "白熊极光保温杯", uses: 47, pct: 85, color: "#3b82f6", gradient: "linear-gradient(90deg, #3b82f6, #06b6d4)" },
