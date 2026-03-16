@@ -41,31 +41,118 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       <div className="bright-card p-5 relative overflow-hidden">
         {/* Subtle tinted top strip */}
         <div className="absolute top-0 left-0 right-0 h-1 rounded-t-[1.25rem]"
-          style={{ background: 'linear-gradient(90deg, #3b82f6, #10b981)' }} />
+          style={{ background: 'linear-gradient(90deg, #3b82f6, #06b6d4)' }} />
 
         <div className="flex items-center gap-5 mt-1">
-          {/* Ring */}
+          {/* Rings */}
           <div className="relative flex-shrink-0">
-            <svg width="96" height="96" viewBox="0 0 96 96" className="-rotate-90">
-              <circle cx="48" cy="48" r="40" fill="none" stroke="#e2e8f8" strokeWidth="9" />
-              <circle
-                cx="48" cy="48" r="40"
-                fill="none"
-                stroke="url(#ringGrad)"
-                strokeWidth="9"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 40 * 0.68} ${2 * Math.PI * 40}`}
-              />
+            <svg width="120" height="120" viewBox="0 0 120 120" className="-rotate-90">
               <defs>
-                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                {/* Water gradient - blue to cyan */}
+                <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+                {/* Calories gradient - red to pink */}
+                <linearGradient id="calorieGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#f43f5e" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+                {/* Caffeine gradient - orange to yellow */}
+                <linearGradient id="caffeineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#f97316" />
+                  <stop offset="100%" stopColor="#eab308" />
                 </linearGradient>
               </defs>
+              
+              {/* Outer ring - Water */}
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#e2e8f8" strokeWidth="16" />
+              <circle
+                cx="60" cy="60" r="50"
+                fill="none"
+                stroke="url(#waterGrad)"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 50 * 0.68} ${2 * Math.PI * 50}`}
+              />
+              
+              {/* Middle ring - Calories */}
+              <circle cx="60" cy="60" r="32" fill="none" stroke="#fee2e2" strokeWidth="16" />
+              <circle
+                cx="60" cy="60" r="32"
+                fill="none"
+                stroke="url(#calorieGrad)"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 32 * 0.45} ${2 * Math.PI * 32}`}
+              />
+              
+              {/* Inner ring - Caffeine */}
+              <circle cx="60" cy="60" r="14" fill="none" stroke="#ffedd5" strokeWidth="16" />
+              <circle
+                cx="60" cy="60" r="14"
+                fill="none"
+                stroke="url(#caffeineGrad)"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 14 * 0.75} ${2 * Math.PI * 14}`}
+              />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-extrabold text-blue-500" style={{ fontSize: '20px', height: '20px' }}>68%</span>
-              <span className="text-slate-400 font-medium mt-1" style={{ fontSize: '13px' }}>目标</span>
+            
+            {/* Icons at 12 o'clock position */}
+            <div className="absolute inset-0">
+              {/* Water icon - outer ring */}
+              <div 
+                className="absolute rounded-full flex items-center justify-center"
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  top: '2px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+              </div>
+              
+              {/* Calories icon - middle ring */}
+              <div 
+                className="absolute w-4 h-4 rounded-full flex items-center justify-center"
+                style={{
+                  top: '20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #f43f5e, #ec4899)'
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                </svg>
+              </div>
+              
+              {/* Caffeine icon - inner ring */}
+              <div 
+                className="absolute rounded-full flex items-center justify-center"
+                style={{
+                  width: '14px',
+                  height: '15px',
+                  top: '38px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #f97316, #eab308)'
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
+                  <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path>
+                  <path d="M6 1v3"></path>
+                  <path d="M10 1v3"></path>
+                  <path d="M14 1v3"></path>
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -101,7 +188,7 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
           </div>
           <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
             <div className="h-full rounded-full"
-              style={{ width: '68%', background: 'linear-gradient(90deg, #3b82f6, #10b981)' }} />
+              style={{ width: '68%', background: 'linear-gradient(90deg, #3b82f6, #06b6d4)' }} />
           </div>
         </div>
       </div>

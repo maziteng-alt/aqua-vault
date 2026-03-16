@@ -29,15 +29,15 @@ const weeklyCaffeine = [
 const categoryDist = [
   { name: "水",   value: 42, color: "#3b82f6" },
   { name: "咖啡", value: 28, color: "#f97316" },
-  { name: "茶饮", value: 15, color: "#10b981" },
-  { name: "奶茶", value: 10, color: "#8b5cf6" },
-  { name: "其他", value: 5,  color: "#f43f5e" },
+  { name: "茶饮", value: 15, color: "#06b6d4" },
+  { name: "奶茶", value: 10, color: "#ec4899" },
+  { name: "其他", value: 5,  color: "#eab308" },
 ]
 
 const radialGoals = [
-  { name: "水分",   value: 68, color: "#3b82f6", bg: "#eff6ff" },
-  { name: "咖啡因", value: 45, color: "#f97316", bg: "#fff7ed" },
-  { name: "热量",   value: 30, color: "#f43f5e", bg: "#fff1f2" },
+  { name: "水分",   value: 68, color: "#3b82f6", bg: "#eff6ff", gradientId: "waterRadialGrad" },
+  { name: "咖啡因", value: 45, color: "#f97316", bg: "#fff7ed", gradientId: "caffeineRadialGrad" },
+  { name: "热量",   value: 30, color: "#f43f5e", bg: "#fff1f2", gradientId: "calorieRadialGrad" },
 ]
 
 const aiInsights = [
@@ -85,8 +85,8 @@ export function InsightsScreen() {
     <div className="flex flex-col gap-6 pb-4">
 
       <div className="pt-1">
-        <p className="text-sm text-slate-400 font-medium">数据分析</p>
-        <h1 className="text-2xl font-bold text-foreground mt-0.5">健康洞察</h1>
+        <p className="text-sm text-slate-400 font-medium">数据分析与健康洞察</p>
+        <h1 className="text-xl font-bold text-foreground mt-0.5">溯源谱SipTrends</h1>
       </div>
 
       {/* Today's Goals */}
@@ -97,12 +97,34 @@ export function InsightsScreen() {
             <div key={d.name} className="flex flex-col items-center gap-2">
               <div className="relative">
                 <svg width="72" height="72" viewBox="0 0 72 72" className="-rotate-90">
-                  <circle cx="36" cy="36" r="30" fill="none" stroke="#f1f5f9" strokeWidth="7" />
+                  <defs>
+                    <linearGradient id={d.gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+                      {d.name === "水分" && (
+                        <>
+                          <stop offset="0%" stopColor="#3b82f6" />
+                          <stop offset="100%" stopColor="#06b6d4" />
+                        </>
+                      )}
+                      {d.name === "咖啡因" && (
+                        <>
+                          <stop offset="0%" stopColor="#f97316" />
+                          <stop offset="100%" stopColor="#eab308" />
+                        </>
+                      )}
+                      {d.name === "热量" && (
+                        <>
+                          <stop offset="0%" stopColor="#f43f5e" />
+                          <stop offset="100%" stopColor="#ec4899" />
+                        </>
+                      )}
+                    </linearGradient>
+                  </defs>
+                  <circle cx="36" cy="36" r="30" fill="none" stroke="#f1f5f9" strokeWidth="10" />
                   <circle
                     cx="36" cy="36" r="30"
                     fill="none"
-                    stroke={d.color}
-                    strokeWidth="7"
+                    stroke={`url(#${d.gradientId})`}
+                    strokeWidth="10"
                     strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 30 * d.value / 100} ${2 * Math.PI * 30}`}
                   />
@@ -233,9 +255,9 @@ export function InsightsScreen() {
       <div className="bright-card p-5">
         <p className="text-sm font-bold text-foreground mb-4">最常用杯子 TOP 3</p>
         {[
-          { name: "白熊极光保温杯", uses: 47, pct: 85, color: "#3b82f6" },
-          { name: "星巴克随行杯",   uses: 32, pct: 58, color: "#10b981" },
-          { name: "精品茶道茶杯",   uses: 28, pct: 50, color: "#f43f5e" },
+          { name: "白熊极光保温杯", uses: 47, pct: 85, color: "#3b82f6", gradient: "linear-gradient(90deg, #3b82f6, #06b6d4)" },
+          { name: "星巴克随行杯",   uses: 32, pct: 58, color: "#f97316", gradient: "linear-gradient(90deg, #f97316, #eab308)" },
+          { name: "精品茶道茶杯",   uses: 28, pct: 50, color: "#f43f5e", gradient: "linear-gradient(90deg, #f43f5e, #ec4899)" },
         ].map((c, i) => (
           <div key={c.name} className="flex items-center gap-3 mb-3.5 last:mb-0">
             <span className="text-xs font-bold text-slate-300 w-5 text-center">{i + 1}</span>
@@ -245,7 +267,7 @@ export function InsightsScreen() {
                 <span className="text-xs font-extrabold" style={{ color: c.color }}>{c.uses} 次</span>
               </div>
               <div className="h-2 rounded-full overflow-hidden bg-slate-100">
-                <div className="h-full rounded-full" style={{ width: `${c.pct}%`, background: c.color }} />
+                <div className="h-full rounded-full" style={{ width: `${c.pct}%`, background: c.gradient }} />
               </div>
             </div>
           </div>

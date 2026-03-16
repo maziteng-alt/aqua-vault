@@ -8,7 +8,7 @@ const tabs = [
   { id: "scan",     label: "采饮台",  icon: Zap },
   { id: "records",  label: "点滴录",  icon: BookOpen },
   { id: "cups",     label: "藏杯坞",  icon: Coffee },
-  { id: "insights", label: "洞察",  icon: BarChart2 },
+  { id: "insights", label: "溯源谱",  icon: BarChart2 },
   { id: "settings", label: "设置",  icon: Settings },
 ]
 
