@@ -196,9 +196,9 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       {/* Quick Actions */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "扫描包装", icon: Camera,     bg: "rgba(59, 130, 246, 0.15)", color: "#3b82f6", border: "rgba(59, 130, 246, 0.3)", glow: "rgba(59, 130, 246, 0.4)", onClick: onScanClick },
-          { label: "选择杯子", icon: GlassWater,  bg: "rgba(6, 182, 212, 0.15)", color: "#06b6d4", border: "rgba(6, 182, 212, 0.3)", glow: "rgba(6, 182, 212, 0.4)", onClick: onViewCupsClick },
-          { label: "手动添加", icon: PenLine,     bg: "rgba(168, 85, 247, 0.15)", color: "#a855f7", border: "rgba(168, 85, 247, 0.3)", glow: "rgba(168, 85, 247, 0.4)", onClick: onAddClick },
+          { label: "扫描包装", icon: Camera,     bg: "rgba(59, 130, 246, 0.08)", color: "#3b82f6", border: "rgba(59, 130, 246, 0.2)", glow: "rgba(59, 130, 246, 0.3)", onClick: onScanClick },
+          { label: "选择杯子", icon: GlassWater,  bg: "rgba(6, 182, 212, 0.08)", color: "#06b6d4", border: "rgba(6, 182, 212, 0.2)", glow: "rgba(6, 182, 212, 0.3)", onClick: onViewCupsClick },
+          { label: "手动添加", icon: PenLine,     bg: "rgba(168, 85, 247, 0.08)", color: "#a855f7", border: "rgba(168, 85, 247, 0.2)", glow: "rgba(168, 85, 247, 0.3)", onClick: onAddClick },
         ].map(a => (
           <button
             key={a.label}
