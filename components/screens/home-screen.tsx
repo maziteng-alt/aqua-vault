@@ -197,7 +197,7 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "扫描包装", icon: Camera,     bg: "#eff6ff", color: "#3b82f6", shadow: "rgba(59,130,246,0.2)",  onClick: onScanClick },
-          { label: "选择杯子", icon: GlassWater,  bg: "#f0fdf4", color: "#10b981", shadow: "rgba(16,185,129,0.2)",  onClick: () => {} },
+          { label: "选择杯子", icon: GlassWater,  bg: "#f0fdf4", color: "#06b6d4", shadow: "rgba(6,182,212,0.2)",  onClick: onViewCupsClick },
           { label: "手动添加", icon: PenLine,     bg: "#fdf4ff", color: "#a855f7", shadow: "rgba(168,85,247,0.2)",  onClick: onAddClick },
         ].map(a => (
           <button
