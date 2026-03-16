@@ -350,7 +350,7 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
               </div>
             </div>
           ))}
-          <button className="flex-shrink-0 p-4 flex flex-col items-center justify-center gap-2.5 w-28 cursor-pointer active:scale-95 transition-transform rounded-2xl border-2 border-dashed border-slate-200" onClick={onAddCupClick}
+          <button className="flex-shrink-0 p-4 flex flex-col items-center justify-center gap-2.5 w-28 cursor-pointer active:scale-95 transition-transform rounded-2xl border-2 border-dashed border-slate-200" onClick={onAddCupClick}>
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50">
               <span className="text-2xl text-slate-300">+</span>
             </div>
