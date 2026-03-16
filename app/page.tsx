@@ -129,7 +129,7 @@ export default function App() {
         {/* Scrollable content */}
         <main
           ref={scrollRef}
-          className="flex-1 overflow-y-auto px-5"
+          className="flex-1 overflow-y-auto px-3"
           style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
         >
           <div key={activeTab} className="animate-in fade-in duration-200">
