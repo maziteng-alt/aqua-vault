@@ -117,13 +117,13 @@ export function RecordsScreen() {
                     {/* Nutrition tags */}
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {[
-                        { val: `${record.volume}ml`,         color: "#3b82f6", bg: "#eff6ff", gradient: "linear-gradient(90deg, #3b82f6, #06b6d4)" },
-                        { val: `${record.calories}kcal`,     color: "#f43f5e", bg: "#fff1f2", gradient: "linear-gradient(90deg, #f43f5e, #ec4899)" },
-                        { val: `${record.caffeine}mg咖啡因`, color: "#f97316", bg: "#fff7ed", gradient: "linear-gradient(90deg, #f97316, #eab308)" },
-                        { val: `${record.sugar}g糖`,         color: "#8b5cf6", bg: "#fdf4ff", gradient: "linear-gradient(90deg, #8b5cf6, #a855f7)" },
+                        { val: `${record.volume}ml`,         color: "#3b82f6", bg: "#eff6ff" },
+                        { val: `${record.calories}kcal`,     color: "#f43f5e", bg: "#fff1f2" },
+                        { val: `${record.caffeine}mg咖啡因`, color: "#f97316", bg: "#fff7ed" },
+                        { val: `${record.sugar}g糖`,         color: "#8b5cf6", bg: "#fdf4ff" },
                       ].map((s, i) => (
                         <span key={i} className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                          style={{ background: s.gradient, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+                          style={{ background: s.bg, color: s.color }}>
                           {s.val}
                         </span>
                       ))}
