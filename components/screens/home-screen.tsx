@@ -54,25 +54,37 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
   const dailyCaffeineLimit = userProfile?.daily_caffeine_limit || 400
   const caffeinePercent = Math.min((todayStats.totalCaffeine / dailyCaffeineLimit) * 100, 100)
 
-  const recentDrinks = drinkRecords.slice(0, 3).map(record => {
-    const config = categoryConfig[record.category] || categoryConfig["自定义"]
-    const time = new Date(record.drink_time)
-    const timeStr = time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    
-    return {
-      id: record.id,
-      name: record.name,
-      brand: record.brand || "",
-      time: timeStr,
-      volume: record.volume,
-      calories: record.calories || 0,
-      caffeine: record.caffeine || 0,
-      category: record.category,
-      bg: config.bg,
-      accent: record.accent_color || config.accent,
-      icon: record.icon || config.icon,
-    }
-  })
+  const recentDrinks = (() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    const todayRecords = drinkRecords.filter((record) => {
+      const recordDate = new Date(record.drink_time)
+      return recordDate >= today && recordDate < tomorrow
+    })
+
+    return todayRecords.slice(0, 3).map(record => {
+      const config = categoryConfig[record.category] || categoryConfig["自定义"]
+      const time = new Date(record.drink_time)
+      const timeStr = time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+      
+      return {
+        id: record.id,
+        name: record.name,
+        brand: record.brand || "",
+        time: timeStr,
+        volume: record.volume,
+        calories: record.calories || 0,
+        caffeine: record.caffeine || 0,
+        category: record.category,
+        bg: config.bg,
+        accent: record.accent_color || config.accent,
+        icon: record.icon || config.icon,
+      }
+    })
+  })()
 
   const favCups = cups.filter(cup => cup.is_favorite).slice(0, 3).map(cup => ({
     id: cup.id,
