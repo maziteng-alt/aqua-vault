@@ -61,7 +61,7 @@ export async function getDrinkRecords({
   offset?: number
 } = {}) {
   try {
-    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+    const { data: { user } } = await supabase.auth.getUser()
     
     let query = supabase
       .from('drink_records')
@@ -84,15 +84,11 @@ export async function getDrinkRecords({
     const { data, error, count } = await query
       .order('drink_time', { ascending: false })
       .range(offset, offset + limit - 1)
-      .catch((err) => ({ data: [], error: err, count: 0 }))
 
-    if (error) {
-      console.error('getDrinkRecords query error:', error)
-      return { records: [], total: 0 }
-    }
-    return { records: data || [], total: count || 0 }
+    if (error) throw error
+    return { records: data, total: count }
   } catch (error) {
-    console.error('getDrinkRecords error:', error)
+    console.log('getDrinkRecords error:', error)
     return { records: [], total: 0 }
   }
 }
@@ -230,15 +226,26 @@ export async function updateDrinkRecord(id: string, updates: Partial<{
 
 export async function deleteDrinkRecord(id: string) {
   try {
-    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
+    let user = null
+    try {
+      const { data: { user: userData } } = await supabase.auth.getUser()
+      user = userData
+    } catch (err) {
+      user = null
+    }
     
     if (user) {
-      const { error } = await supabase
-        .from('drink_records')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .catch((err) => ({ error: err }))
+      let error = null
+      try {
+        const result = await supabase
+          .from('drink_records')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id)
+        error = result.error
+      } catch (err) {
+        error = err
+      }
 
       if (error) {
         console.error('deleteDrinkRecord database error:', error)
