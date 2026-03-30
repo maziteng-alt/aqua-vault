@@ -53,7 +53,25 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
     
-    let resultText = data.output?.text || data.choices?.[0]?.message?.content || ""
+    let resultText = ""
+    
+    if (data.output && Array.isArray(data.output)) {
+      for (const out of data.output) {
+        if (out.type === "message" && out.content && Array.isArray(out.content)) {
+          for (const c of out.content) {
+            if (c.type === "output_text" && c.text) {
+              resultText = c.text
+              break
+            }
+          }
+          if (resultText) break
+        }
+      }
+    }
+    
+    if (!resultText) {
+      throw new Error("No text found in response")
+    }
     
     let jsonMatch = resultText.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
