@@ -61,7 +61,7 @@ export async function getDrinkRecords({
   offset?: number
 } = {}) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
     
     let query = supabase
       .from('drink_records')
@@ -84,11 +84,15 @@ export async function getDrinkRecords({
     const { data, error, count } = await query
       .order('drink_time', { ascending: false })
       .range(offset, offset + limit - 1)
+      .catch((err) => ({ data: [], error: err, count: 0 }))
 
-    if (error) throw error
-    return { records: data, total: count }
+    if (error) {
+      console.error('getDrinkRecords query error:', error)
+      return { records: [], total: 0 }
+    }
+    return { records: data || [], total: count || 0 }
   } catch (error) {
-    console.log('getDrinkRecords error:', error)
+    console.error('getDrinkRecords error:', error)
     return { records: [], total: 0 }
   }
 }

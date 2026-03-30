@@ -87,12 +87,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setLoading(true)
       
       let user = null
-      let recordsData = { records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } }
+      let recordsData = { records: [], total: 0 }
+      let todayStatsData = { records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } }
       let cupsData: any[] = []
       
       try {
-        [user, recordsData, cupsData] = await Promise.all([
+        [user, recordsData, todayStatsData, cupsData] = await Promise.all([
           api.getUserProfile().catch(() => null),
+          api.getDrinkRecords({ limit: 100 }).catch(() => ({ records: [], total: 0 })),
           api.getTodayDrinkRecords().catch(() => ({ records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } })),
           api.getCups().catch(() => []),
         ])
@@ -102,7 +104,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       setUserProfile(user)
       setDrinkRecords(recordsData.records)
-      setTodayStats(recordsData.stats)
+      setTodayStats(todayStatsData.stats)
       setCups(cupsData)
     } catch (error) {
       console.error('Failed to load data:', error)
