@@ -146,29 +146,6 @@ export async function getDrinkRecord(id: string) {
   return data
 }
 
-export async function deleteDrinkRecord(id: string) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (user) {
-      const { error } = await supabase
-        .from('drink_records')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id)
-
-      if (error) throw error
-      return true
-    } else {
-      // User not logged in, return success for mock
-      return true
-    }
-  } catch (error) {
-    console.error('deleteDrinkRecord error:', error)
-    throw error
-  }
-}
-
 export async function createDrinkRecord(record: {
   name: string
   brand?: string
@@ -248,12 +225,26 @@ export async function updateDrinkRecord(id: string, updates: Partial<{
 }
 
 export async function deleteDrinkRecord(id: string) {
-  const { error } = await supabase
-    .from('drink_records')
-    .delete()
-    .eq('id', id)
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (user) {
+      const { error } = await supabase
+        .from('drink_records')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id)
 
-  if (error) throw error
+      if (error) throw error
+      return true
+    } else {
+      // User not logged in, return success for mock
+      return true
+    }
+  } catch (error) {
+    console.error('deleteDrinkRecord error:', error)
+    throw error
+  }
 }
 
 // ================================
