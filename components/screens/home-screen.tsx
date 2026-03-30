@@ -284,7 +284,54 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
 
       {/* AI Insight */}
       <div className="glass-card p-4 relative overflow-hidden rounded-[1.25rem] border border-white/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500">
-        <div className="flex items-start gap-3">
+        <div className="absolute top-3 right-3">
+          <button
+            onClick={() => {
+              const today = new Date()
+              today.setHours(0, 0, 0, 0)
+              const tomorrow = new Date(today)
+              tomorrow.setDate(tomorrow.getDate() + 1)
+
+              const todayRecords = drinkRecords.filter((record) => {
+                const recordDate = new Date(record.drink_time)
+                return recordDate >= today && recordDate < tomorrow
+              })
+
+              if (todayRecords.length === 0) {
+                setAiInsight("今天还没有饮品记录呢，开始记录你的第一杯吧！")
+                return
+              }
+
+              setInsightLoading(true)
+              fetch("/api/ai-insight", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ drinks: todayRecords }),
+              })
+                .then(res => res.json())
+                .then(data => setAiInsight(data.insight))
+                .catch(() => setAiInsight("继续保持良好的饮水习惯，适量饮水有益健康！"))
+                .finally(() => setInsightLoading(false))
+            }}
+            disabled={insightLoading}
+            className="glass-inner w-8 h-8 rounded-lg flex items-center justify-center text-violet-600 hover:text-violet-800 transition-colors disabled:opacity-50"
+          >
+            <svg 
+              className={`w-4 h-4 ${insightLoading ? 'animate-spin' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+              />
+            </svg>
+          </button>
+        </div>
+        <div className="flex items-start gap-3 pr-10">
           <div className="glass-inner w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl">
             💡
           </div>
