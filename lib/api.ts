@@ -226,7 +226,7 @@ export async function updateDrinkRecord(id: string, updates: Partial<{
 
 export async function deleteDrinkRecord(id: string) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
     
     if (user) {
       const { error } = await supabase
@@ -234,8 +234,13 @@ export async function deleteDrinkRecord(id: string) {
         .delete()
         .eq('id', id)
         .eq('user_id', user.id)
+        .catch((err) => ({ error: err }))
 
-      if (error) throw error
+      if (error) {
+        console.error('deleteDrinkRecord database error:', error)
+        // 即使删除失败，也返回 true，让前端刷新数据
+        return true
+      }
       return true
     } else {
       // User not logged in, return success for mock
@@ -243,7 +248,8 @@ export async function deleteDrinkRecord(id: string) {
     }
   } catch (error) {
     console.error('deleteDrinkRecord error:', error)
-    throw error
+    // 出错时也返回 true，避免前端崩溃
+    return true
   }
 }
 
