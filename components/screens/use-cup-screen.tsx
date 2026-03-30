@@ -57,7 +57,7 @@ export function UseCupScreen({ cup, onBack }: UseCupScreenProps) {
   }
 
   const adjustVolume = (delta: number) => {
-    setVolume(prev => Math.max(50, Math.min(prev + delta, 2000)))
+    setVolume(prev => Math.max(50, Math.min(prev + delta, 500)))
   }
 
   return (
@@ -113,21 +113,16 @@ export function UseCupScreen({ cup, onBack }: UseCupScreenProps) {
         
         {/* Slider */}
         <div className="relative mb-4">
-          <div className="flex justify-between items-end gap-1 overflow-x-auto pb-2">
-            {[50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1500, 1800, 2000].map((value) => {
-              const isActive = volume === value
-              const isVisible = value <= 1000 || value % 200 === 0
+          <div className="flex justify-between items-center gap-2 overflow-x-auto">
+            {Array.from({ length: 15 }, (_, index) => {
+              const value = 50 + index * 33 // 50ml 到 500ml，15个柱子
+              const isActive = Math.abs(volume - value) <= 25 // 选择最近的柱子
               return (
                 <div key={value} className="flex-shrink-0 flex flex-col items-center">
                   <div 
                     onClick={() => setVolume(value)}
-                    className={`w-3 transition-all cursor-pointer ${isActive ? 'h-12 bg-blue-500' : 'h-8 bg-slate-200'}`}
+                    className={`w-1.5 transition-all cursor-pointer ${isActive ? 'h-10 bg-blue-500' : 'h-6 bg-slate-300'}`}
                   />
-                  {isVisible && (
-                    <span className={`text-xs mt-1 ${isActive ? 'text-blue-500 font-bold' : 'text-slate-400'}`}>
-                      {value}
-                    </span>
-                  )}
                 </div>
               )
             })}
