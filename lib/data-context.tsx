@@ -87,24 +87,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setLoading(true)
       
       let user = null
-      let recordsData = { records: [], total: 0 }
-      let todayStatsData = { records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } }
+      let allRecords: any[] = []
       let cupsData: any[] = []
       
       try {
-        [user, recordsData, todayStatsData, cupsData] = await Promise.all([
+        const [userResult, recordsResult, cupsResult] = await Promise.all([
           api.getUserProfile().catch(() => null),
-          api.getDrinkRecords({ limit: 100 }).catch(() => ({ records: [], total: 0 })),
-          api.getTodayDrinkRecords().catch(() => ({ records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } })),
+          api.getDrinkRecords({ limit: 100 }).catch(() => ({ records: [] })),
           api.getCups().catch(() => []),
         ])
+        user = userResult
+        allRecords = recordsResult.records || []
+        cupsData = cupsResult
       } catch (error) {
         console.log('Using fallback data due to API error:', error)
       }
 
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      const todayRecords = allRecords.filter((record: any) => {
+        const recordDate = new Date(record.drink_time)
+        return recordDate >= today && recordDate < tomorrow
+      })
+
+      const todayStats = todayRecords.reduce(
+        (acc, record) => ({
+          totalVolume: acc.totalVolume + record.volume,
+          totalCaffeine: acc.totalCaffeine + (record.caffeine || 0),
+          totalSugar: acc.totalSugar + (record.sugar || 0),
+          totalCalories: acc.totalCalories + (record.calories || 0),
+        }),
+        { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 }
+      )
+
       setUserProfile(user)
-      setDrinkRecords(recordsData.records)
-      setTodayStats(todayStatsData.stats)
+      setDrinkRecords(allRecords)
+      setTodayStats(todayStats)
       setCups(cupsData)
     } catch (error) {
       console.error('Failed to load data:', error)
