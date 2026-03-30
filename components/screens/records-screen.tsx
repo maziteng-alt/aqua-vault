@@ -118,7 +118,7 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
             <div
               key={idx}
               onClick={() => setSelectedDate(item.fullDate)}
-              className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl flex-1 cursor-pointer transition-all ${
+              className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-md flex-1 cursor-pointer transition-all ${
                 item.fullDate.toDateString() === selectedDate.toDateString()
                   ? 'bg-slate-900 text-white shadow-lg'
                   : 'bg-white/60 backdrop-blur-md border border-white/50 text-slate-600'
@@ -162,7 +162,7 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
             </div>
             
             {dailyStats.topCategories.map((cat, idx) => (
-              <div key={idx} className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-xl p-2 w-28 border border-white/60 flex justify-between items-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
+              <div key={idx} className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-20 border border-white/60 flex justify-between items-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
                 <div>
                   <span className="text-[10px] text-slate-600 font-medium mb-0.5 block">{cat.category}</span>
                   <div className="flex items-baseline gap-0.5">
