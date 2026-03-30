@@ -24,8 +24,54 @@ const categoryConfig: Record<string, { bg: string, accent: string, icon: string,
 const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
 export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
-  const { drinkRecords, loading, userProfile } = useData()
+  const { drinkRecords, loading, userProfile, deleteDrinkRecord } = useData()
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [longPressedRecord, setLongPressedRecord] = useState<string | null>(null)
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null)
+
+  const handleTouchStart = (recordId: string) => {
+    const timer = setTimeout(() => {
+      setLongPressedRecord(recordId)
+    }, 500)
+    setLongPressTimer(timer)
+  }
+
+  const handleTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer)
+      setLongPressTimer(null)
+    }
+  }
+
+  const handleMouseDown = (recordId: string) => {
+    const timer = setTimeout(() => {
+      setLongPressedRecord(recordId)
+    }, 500)
+    setLongPressTimer(timer)
+  }
+
+  const handleMouseUp = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer)
+      setLongPressTimer(null)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer)
+      setLongPressTimer(null)
+    }
+  }
+
+  const handleDelete = async (recordId: string) => {
+    try {
+      await deleteDrinkRecord(recordId)
+      setLongPressedRecord(null)
+    } catch (error) {
+      console.error("Delete error:", error)
+    }
+  }
 
   const calendarDays = useMemo(() => {
     const days = []
@@ -153,7 +199,7 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-            <div className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-16 border border-white/60 flex flex-col justify-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
+            <div className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-20 border border-white/60 flex flex-col justify-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
               <span className="text-[10px] text-slate-600 font-medium mb-0.5">总计</span>
               <div className="flex items-baseline gap-0.5">
                 <span className="text-base font-bold text-slate-800">{dailyStats.totalCount}</span>
@@ -162,7 +208,7 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
             </div>
             
             {dailyStats.topCategories.map((cat, idx) => (
-              <div key={idx} className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-16 border border-white/60 flex justify-between items-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
+              <div key={idx} className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-20 border border-white/60 flex justify-between items-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
                 <div>
                   <span className="text-[10px] text-slate-600 font-medium mb-0.5 block">{cat.category}</span>
                   <div className="flex items-baseline gap-0.5">
@@ -193,8 +239,32 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
             {filteredRecords.map((record) => (
               <div
                 key={record.id}
-                className="relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] rounded-2xl p-4 transition-transform hover:scale-[1.02]"
+                className={`relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] rounded-2xl p-4 transition-all hover:scale-[1.02] ${
+                  longPressedRecord === record.id ? 'bg-red-50/50 border-red-200' : ''
+                }`}
+                onTouchStart={() => handleTouchStart(record.id)}
+                onTouchEnd={handleTouchEnd}
+                onMouseDown={() => handleMouseDown(record.id)}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
               >
+                {longPressedRecord === record.id && (
+                  <div className="absolute inset-0 z-50 flex items-center justify-center bg-red-100/90 backdrop-blur-md rounded-2xl">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDelete(record.id)
+                      }}
+                      className="flex items-center gap-2 bg-red-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-red-600 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      删除记录
+                    </button>
+                  </div>
+                )}
+                
                 <div className="flex justify-between items-start mb-3 relative z-10">
                   <div className="pr-14">
                     <h3 className="text-base font-bold text-slate-800 mb-0.5">{record.name}</h3>
