@@ -103,7 +103,7 @@ export default function App() {
           <div className="flex flex-col gap-5">
             <div className="flex gap-2 p-1 bg-white rounded-2xl border border-border shadow-sm">
               <button
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-blue-500 text-white shadow-sm"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/60 backdrop-blur-xl border border-blue-200 text-blue-700 shadow-sm"
               >
                 AI 扫描识别
               </button>
@@ -128,7 +128,7 @@ export default function App() {
                 AI 扫描识别
               </button>
               <button
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-violet-500 text-white shadow-sm"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/60 backdrop-blur-xl border border-violet-200 text-violet-700 shadow-sm"
               >
                 手动添加
               </button>
