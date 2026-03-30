@@ -187,43 +187,57 @@ export function ScanScreen() {
             </div>
 
             {/* Result card */}
-            <div className="rounded-2xl p-4" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-              <div className="flex items-center gap-3 mb-4">
-                {photoPreview ? (
-                  <img
-                    src={photoPreview}
-                    alt="饮品包装"
-                    className="w-14 h-14 rounded-2xl object-cover bg-white shadow-sm flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-white shadow-sm flex-shrink-0">
-                    🥤
-                  </div>
-                )}
-                <div>
-                  <p className="text-xs text-slate-400 font-medium">{recognitionResult.brand}</p>
-                  <p className="text-base font-bold text-foreground">{recognitionResult.name}</p>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-600">
+            <div className="relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] rounded-2xl p-4 transition-transform hover:scale-[1.02]">
+              <div className="flex justify-between items-start mb-3 relative z-10">
+                <div className="pr-14">
+                  <h3 className="text-base font-bold text-slate-800 mb-0.5">{recognitionResult.name}</h3>
+                  <p className="text-[11px] text-slate-500 mb-1.5 font-medium">
+                    {recognitionResult.brand} 
+                    <span className="mx-1 text-slate-300">|</span> 
+                    {recognitionResult.volume}ml
+                  </p>
+                  <span className="inline-block px-2 py-0.5 rounded-full border text-[9px] font-medium backdrop-blur-md bg-[#FAF6F3]/60 border-[#D4C4B7] text-[#8C7A6B]">
                     {recognitionResult.category}
                   </span>
                 </div>
               </div>
-
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { label: "容量",  value: recognitionResult.volume,   unit: "ml",   icon: Droplets, bg: "#dbeafe", color: "#3b82f6" },
-                  { label: "热量",  value: recognitionResult.calories, unit: "kcal", icon: Flame,    bg: "#ffe4e6", color: "#f43f5e" },
-                  { label: "糖分",  value: recognitionResult.sugar,    unit: "g",    icon: Zap,      bg: "#fef9c3", color: "#ca8a04" },
-                  { label: "咖啡因",value: recognitionResult.caffeine, unit: "mg",   icon: Coffee,   bg: "#ede9fe", color: "#8b5cf6" },
-                ].map(s => (
-                  <div key={s.label} className="rounded-xl p-2.5 flex flex-col items-center gap-1"
-                    style={{ background: s.bg }}>
-                    <s.icon size={13} style={{ color: s.color }} />
-                    <span className="text-sm font-bold" style={{ color: s.color }}>{s.value}</span>
-                    <span className="text-[9px] text-slate-400">{s.unit}</span>
-                    <span className="text-[9px] text-slate-500 font-medium">{s.label}</span>
-                  </div>
-                ))}
+              
+              {/* 右上角图片 */}
+              <div className="absolute -top-2 -right-2 w-20 h-20 z-0">
+                <div className="absolute inset-0 rounded-full border border-dashed border-slate-300/60 m-1"></div>
+                <div className="absolute inset-2.5 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-md shadow-sm border border-white/80 flex items-center justify-center overflow-hidden">
+                  {photoPreview ? (
+                    <img
+                      src={photoPreview}
+                      alt="实拍图"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-3xl">🥛</span>
+                  )}
+                </div>
+              </div>
+              
+              {/* 营养信息 */}
+              <div className="grid grid-cols-3 gap-2 relative z-10">
+                <div className="bg-white/50 backdrop-blur-md rounded-xl p-2 border border-white/40 shadow-sm flex flex-col justify-center">
+                  <p className="text-[9px] text-slate-500 mb-0.5 font-medium">热量</p>
+                  <p className="font-bold text-slate-800 text-sm flex items-baseline gap-0.5 leading-none">
+                    {recognitionResult.calories} <span className="text-[8px] font-normal text-slate-500">Kcal</span>
+                  </p>
+                </div>
+                <div className="bg-white/50 backdrop-blur-md rounded-xl p-2 border border-white/40 shadow-sm flex flex-col justify-center">
+                  <p className="text-[9px] text-slate-500 mb-0.5 font-medium">糖分</p>
+                  <p className="font-bold text-slate-800 text-sm flex items-baseline gap-0.5 leading-none">
+                    {recognitionResult.sugar} <span className="text-[8px] font-normal text-slate-500">g</span>
+                  </p>
+                </div>
+                <div className="bg-white/50 backdrop-blur-md rounded-xl p-2 border border-white/40 shadow-sm flex flex-col justify-center">
+                  <p className="text-[9px] text-slate-500 mb-0.5 font-medium">咖啡因</p>
+                  <p className="font-bold text-slate-800 text-sm flex items-baseline gap-0.5 leading-none">
+                    {recognitionResult.caffeine} <span className="text-[8px] font-normal text-slate-500">mg</span>
+                  </p>
+                </div>
               </div>
             </div>
 
