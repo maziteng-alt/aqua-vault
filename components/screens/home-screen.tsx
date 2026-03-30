@@ -37,6 +37,8 @@ function getGreeting() {
 export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onViewCupsClick, onAddCupClick, onUseCupClick }: HomeScreenProps) {
   const { drinkRecords, cups, todayStats, userProfile, loading } = useData()
   const [greeting, setGreeting] = useState(getGreeting())
+  const [aiInsight, setAiInsight] = useState("")
+  const [insightLoading, setInsightLoading] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,6 +46,48 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
     }, 60000)
     return () => clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    const fetchInsight = async () => {
+      if (drinkRecords.length === 0) {
+        setAiInsight("今天还没有饮品记录呢，开始记录你的第一杯吧！")
+        return
+      }
+
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      const todayRecords = drinkRecords.filter((record) => {
+        const recordDate = new Date(record.drink_time)
+        return recordDate >= today && recordDate < tomorrow
+      })
+
+      if (todayRecords.length === 0) {
+        setAiInsight("今天还没有饮品记录呢，开始记录你的第一杯吧！")
+        return
+      }
+
+      setInsightLoading(true)
+      try {
+        const response = await fetch("/api/ai-insight", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ drinks: todayRecords }),
+        })
+        const data = await response.json()
+        setAiInsight(data.insight)
+      } catch (error) {
+        console.error("Fetch AI insight error:", error)
+        setAiInsight("继续保持良好的饮水习惯，适量饮水有益健康！")
+      } finally {
+        setInsightLoading(false)
+      }
+    }
+
+    fetchInsight()
+  }, [drinkRecords])
 
   const dailyGoal = userProfile?.daily_water_goal || 2000
   const progressPercent = Math.min((todayStats.totalVolume / dailyGoal) * 100, 100)
@@ -252,7 +296,13 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
               </span>
             </div>
             <p className="text-xs text-violet-600 leading-relaxed font-medium">
-              你在 14:00–15:00 饮用咖啡因的频率高达 85%。试试换成低糖绿茶来平缓能量波动？
+              {insightLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="animate-pulse">思考中...</span>
+                </span>
+              ) : (
+                aiInsight
+              )}
             </p>
           </div>
         </div>
