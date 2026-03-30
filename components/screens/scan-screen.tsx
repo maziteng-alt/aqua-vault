@@ -2,7 +2,8 @@
 
 import { useState, useRef } from "react"
 import { Upload, Scan, CheckCircle2, Edit3, Sparkles, Zap, Droplets, Flame, Coffee, AlertCircle } from "lucide-react"
-import { recognizeDrinkWithDoubao, type DrinkRecognitionResult, createDrinkRecord } from "@/lib/api"
+import { recognizeDrinkWithDoubao, type DrinkRecognitionResult } from "@/lib/api"
+import { useData } from "@/lib/data-context"
 
 type ScanState = "idle" | "scanning" | "result" | "saving" | "saved"
 
@@ -20,6 +21,7 @@ const categoryConfig: Record<string, { icon: string, color: string}> = {
 }
 
 export function ScanScreen() {
+  const { addDrinkRecord } = useData()
   const [scanState, setScanState] = useState<ScanState>("idle")
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [recognitionResult, setRecognitionResult] = useState<DrinkRecognitionResult | null>(null)
@@ -258,7 +260,7 @@ export function ScanScreen() {
                     setScanState("saving")
                     try {
                       const config = categoryConfig[recognitionResult.category] || categoryConfig["自定义"]
-                      await createDrinkRecord({
+                      await addDrinkRecord({
                         name: recognitionResult.name,
                         brand: recognitionResult.brand,
                         volume: recognitionResult.volume,
@@ -268,6 +270,7 @@ export function ScanScreen() {
                         category: recognitionResult.category,
                         icon: config.icon,
                         accent_color: config.color,
+                        drink_time: new Date(),
                       })
                       setScanState("saved")
                     } catch (error) {
