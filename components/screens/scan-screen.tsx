@@ -17,7 +17,6 @@ const categoryConfig: Record<string, { icon: string, color: string}> = {
   "能量": { icon: "⚡", color: "#ec4899" },
   "酒精": { icon: "🍺", color: "#64748b" },
   "自定义": { icon: "🥛", color: "#0ea5e9" },
-  "碳酸饮料": { icon: "🥤", color: "#ca8a04" },
 }
 
 export function ScanScreen() {
