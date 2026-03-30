@@ -19,21 +19,16 @@ import * as api from "@/lib/api"
 export default function App() {
   const [activeTab, setActiveTab] = useState("home")
   const [showAddCup, setShowAddCup] = useState(false)
-  const [useCup, setUseCup] = useState<{
-    id: string
-    name: string
-    capacity: number
-    icon?: string
-  } | null>(null)
+  const [useCup, setUseCup] = useState(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
-  const scrollRef = useRef<HTMLElement>(null)
+  const scrollRef = useRef(null)
 
-  useEffect(() => {
+  useEffect(function() {
     checkAuth()
   }, [])
 
-  const checkAuth = async () => {
+  const checkAuth = async function() {
     try {
       const user = await api.getCurrentUser()
       setIsLoggedIn(!!user)
@@ -44,16 +39,16 @@ export default function App() {
     }
   }
 
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = function(tab) {
     setActiveTab(tab)
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: 0, behavior: 'auto' })
-      setTimeout(() => {
+      setTimeout(function() {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({ top: 0, behavior: 'auto' })
         }
       }, 50)
-      setTimeout(() => {
+      setTimeout(function() {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({ top: 0, behavior: 'auto' })
         }
@@ -61,7 +56,7 @@ export default function App() {
     }
   }
 
-  const renderScreen = () => {
+  const renderScreen = function() {
     if (checkingAuth) {
       return (
         <div className="flex flex-col gap-6 pb-4 pt-20 items-center justify-center">
@@ -72,36 +67,36 @@ export default function App() {
     }
 
     if (!isLoggedIn) {
-      return <LoginScreen onLogin={() => {
+      return <LoginScreen onLogin={function() {
         setIsLoggedIn(true)
       }} />
     }
 
     if (showAddCup) {
       return <AddCupScreen 
-        onBack={() => setShowAddCup(false)} 
+        onBack={function() { setShowAddCup(false) }} 
       />
     }
 
     if (useCup) {
       return <UseCupScreen 
         cup={useCup}
-        onBack={() => setUseCup(null)} 
+        onBack={function() { setUseCup(null) }} 
       />
     }
 
     switch (activeTab) {
       case "home":
         return <HomeScreen 
-          onScanClick={() => handleTabChange("scan")} 
-          onAddClick={() => handleTabChange("add")}
-          onViewAllRecordsClick={() => handleTabChange("records")}
-          onViewCupsClick={() => handleTabChange("cups")}
-          onAddCupClick={() => {
+          onScanClick={function() { handleTabChange("scan") }} 
+          onAddClick={function() { handleTabChange("add") }}
+          onViewAllRecordsClick={function() { handleTabChange("records") }}
+          onViewCupsClick={function() { handleTabChange("cups") }}
+          onAddCupClick={function() {
             setActiveTab("cups")
             setShowAddCup(true)
           }}
-          onUseCupClick={(cup) => setUseCup(cup)}
+          onUseCupClick={function(cup) { setUseCup(cup) }}
         />
       case "scan":
         return (
@@ -113,7 +108,7 @@ export default function App() {
                 AI 扫描识别
               </button>
               <button
-                onClick={() => handleTabChange("add")}
+                onClick={function() { handleTabChange("add") }}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-400"
               >
                 手动添加
@@ -127,7 +122,7 @@ export default function App() {
           <div className="flex flex-col gap-5">
             <div className="flex gap-2 p-1 bg-white rounded-2xl border border-border shadow-sm">
               <button
-                onClick={() => handleTabChange("scan")}
+                onClick={function() { handleTabChange("scan") }}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-400"
               >
                 AI 扫描识别
@@ -138,15 +133,15 @@ export default function App() {
                 手动添加
               </button>
             </div>
-            <AddRecordScreen onBack={() => handleTabChange("home")} />
+            <AddRecordScreen onBack={function() { handleTabChange("home") }} />
           </div>
         )
       case "records":
-        return <RecordsScreen />
+        return <RecordsScreen onAddClick={function() { handleTabChange("home") }} />
       case "cups":
         return <CupsScreen 
-          onAddCupClick={() => setShowAddCup(true)} 
-          onUseCupClick={(cup) => setUseCup(cup)}
+          onAddCupClick={function() { setShowAddCup(true) }} 
+          onUseCupClick={function(cup) { setUseCup(cup) }}
         />
       case "insights":
         return <InsightsScreen />
@@ -154,15 +149,15 @@ export default function App() {
         return <SettingsScreen />
       default:
         return <HomeScreen 
-          onScanClick={() => handleTabChange("scan")} 
-          onAddClick={() => handleTabChange("add")}
-          onViewAllRecordsClick={() => handleTabChange("records")}
-          onViewCupsClick={() => handleTabChange("cups")}
-          onAddCupClick={() => {
+          onScanClick={function() { handleTabChange("scan") }} 
+          onAddClick={function() { handleTabChange("add") }}
+          onViewAllRecordsClick={function() { handleTabChange("records") }}
+          onViewCupsClick={function() { handleTabChange("cups") }}
+          onAddCupClick={function() {
             setActiveTab("cups")
             setShowAddCup(true)
           }}
-          onUseCupClick={(cup) => setUseCup(cup)}
+          onUseCupClick={function(cup) { setUseCup(cup) }}
         />
     }
   }

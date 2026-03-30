@@ -15,14 +15,14 @@ export function SettingsScreen() {
   
   const [dailyWaterGoal, setDailyWaterGoal] = useState(2000)
   const [dailyCaffeineLimit, setDailyCaffeineLimit] = useState(400)
-  const [dailyCalorieGoal, setDailyCalorieGoal] = useState(2000)
+  const [dailyCalorieGoal, setDailyCalorieGoal] = useState(200)
   const [dailySugarLimit, setDailySugarLimit] = useState(50)
 
   useEffect(() => {
     if (userProfile) {
       setDailyWaterGoal(userProfile.daily_water_goal || 2000)
       setDailyCaffeineLimit(userProfile.daily_caffeine_limit || 400)
-      setDailyCalorieGoal(userProfile.daily_calorie_goal || 2000)
+      setDailyCalorieGoal(userProfile.daily_calorie_goal || 200)
       setDailySugarLimit(userProfile.daily_sugar_limit || 50)
     }
   }, [userProfile])
@@ -102,7 +102,7 @@ export function SettingsScreen() {
         </div>
         <input
           type="number"
-          min="1000"
+          min="100"
           max="5000"
           step="100"
           className="input-bright w-full px-4 py-3 text-sm"

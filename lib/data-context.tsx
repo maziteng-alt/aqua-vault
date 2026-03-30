@@ -86,11 +86,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true)
       
-      const [user, recordsData, cupsData] = await Promise.all([
-        api.getUserProfile(),
-        api.getTodayDrinkRecords(),
-        api.getCups(),
-      ])
+      let user = null
+      let recordsData = { records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } }
+      let cupsData: any[] = []
+      
+      try {
+        [user, recordsData, cupsData] = await Promise.all([
+          api.getUserProfile().catch(() => null),
+          api.getTodayDrinkRecords().catch(() => ({ records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } })),
+          api.getCups().catch(() => []),
+        ])
+      } catch (error) {
+        console.log('Using fallback data due to API error:', error)
+      }
 
       setUserProfile(user)
       setDrinkRecords(recordsData.records)

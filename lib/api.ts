@@ -4,17 +4,22 @@ import { supabase } from './supabase'
 // User Profile API
 // ================================
 export async function getUserProfile() {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
 
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
 
-  if (error) throw error
-  return data
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.log('getUserProfile error:', error)
+    return null
+  }
 }
 
 export async function updateUserProfile(updates: {
@@ -78,32 +83,37 @@ export async function getDrinkRecords({
 }
 
 export async function getTodayDrinkRecords() {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  try {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
 
-  const { data, error } = await supabase
-    .from('drink_records')
-    .select('*')
-    .gte('drink_time', today.toISOString())
-    .lt('drink_time', tomorrow.toISOString())
-    .order('drink_time', { ascending: false })
+    const { data, error } = await supabase
+      .from('drink_records')
+      .select('*')
+      .gte('drink_time', today.toISOString())
+      .lt('drink_time', tomorrow.toISOString())
+      .order('drink_time', { ascending: false })
 
-  if (error) throw error
+    if (error) throw error
 
-  const stats = data.reduce(
-    (acc, record) => ({
-      totalVolume: acc.totalVolume + record.volume,
-      totalCaffeine: acc.totalCaffeine + record.caffeine,
-      totalSugar: acc.totalSugar + record.sugar,
-      totalCalories: acc.totalCalories + record.calories,
-    }),
-    { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 }
-  )
+    const stats = data.reduce(
+      (acc, record) => ({
+        totalVolume: acc.totalVolume + record.volume,
+        totalCaffeine: acc.totalCaffeine + (record.caffeine || 0),
+        totalSugar: acc.totalSugar + (record.sugar || 0),
+        totalCalories: acc.totalCalories + (record.calories || 0),
+      }),
+      { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 }
+    )
 
-  return { records: data, stats }
+    return { records: data, stats }
+  } catch (error) {
+    console.log('getTodayDrinkRecords error:', error)
+    return { records: [], stats: { totalVolume: 0, totalCaffeine: 0, totalSugar: 0, totalCalories: 0 } }
+  }
 }
 
 export async function getDrinkRecord(id: string) {
@@ -184,14 +194,19 @@ export async function deleteDrinkRecord(id: string) {
 // Cups API
 // ================================
 export async function getCups() {
-  const { data, error } = await supabase
-    .from('cups')
-    .select('*')
-    .order('is_favorite', { ascending: false })
-    .order('use_count', { ascending: false })
+  try {
+    const { data, error } = await supabase
+      .from('cups')
+      .select('*')
+      .order('is_favorite', { ascending: false })
+      .order('use_count', { ascending: false })
 
-  if (error) throw error
-  return data
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.log('getCups error:', error)
+    return []
+  }
 }
 
 export async function getFavoriteCups() {

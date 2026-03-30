@@ -36,7 +36,7 @@ const categoryDist = [
 
 const radialGoals = [
   { name: "水分",   value: 68, color: "#3b82f6", bg: "#eff6ff", gradientId: "waterRadialGrad" },
-  { name: "咖啡因", value: 45, color: "#f97316", bg: "#fff7ed", gradientId: "caffeineRadialGrad" },
+  { name: "咖啡因", value: 45, color: "#7D4141", bg: "#fff7ed", gradientId: "caffeineRadialGrad" },
   { name: "热量",   value: 30, color: "#f43f5e", bg: "#fff1f2", gradientId: "calorieRadialGrad" },
 ]
 
@@ -107,8 +107,8 @@ export function InsightsScreen() {
                       )}
                       {d.name === "咖啡因" && (
                         <>
-                          <stop offset="0%" stopColor="#f97316" />
-                          <stop offset="100%" stopColor="#eab308" />
+                          <stop offset="0%" stopColor="#7D4141" />
+                          <stop offset="100%" stopColor="#FFEBBE" />
                         </>
                       )}
                       {d.name === "热量" && (
@@ -184,15 +184,15 @@ export function InsightsScreen() {
           <AreaChart data={weeklyCaffeine} margin={{ top: 5, right: 4, bottom: 0, left: -24 }}>
             <defs>
               <linearGradient id="cafGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#f97316" stopOpacity={0.18} />
-                <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                <stop offset="5%"  stopColor="#7D4141" stopOpacity={0.18} />
+                <stop offset="95%" stopColor="#7D4141" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis dataKey="day" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fill: '#cbd5e1', fontSize: 9 }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={TooltipStyle} cursor={{ stroke: 'rgba(249,115,22,0.15)' }} />
-            <Area type="monotone" dataKey="value" stroke="#f97316" strokeWidth={2.5}
-              fill="url(#cafGrad)" dot={false} activeDot={{ r: 5, fill: '#f97316', stroke: '#fff', strokeWidth: 2 }} />
+            <Tooltip contentStyle={TooltipStyle} cursor={{ stroke: 'rgba(125,65,65,0.15)' }} />
+            <Area type="monotone" dataKey="value" stroke="#7D4141" strokeWidth={2.5}
+              fill="url(#cafGrad)" dot={false} activeDot={{ r: 5, fill: '#7D4141', stroke: '#fff', strokeWidth: 2 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -256,7 +256,7 @@ export function InsightsScreen() {
         <p className="text-sm font-bold text-foreground mb-4">最常用杯子 TOP 3</p>
         {[
           { name: "白熊极光保温杯", uses: 47, pct: 85, color: "#3b82f6", gradient: "linear-gradient(90deg, #3b82f6, #06b6d4)" },
-          { name: "星巴克随行杯",   uses: 32, pct: 58, color: "#f97316", gradient: "linear-gradient(90deg, #f97316, #eab308)" },
+          { name: "星巴克随行杯",   uses: 32, pct: 58, color: "#7D4141", gradient: "linear-gradient(90deg, #7D4141, #FFEBBE)" },
           { name: "精品茶道茶杯",   uses: 28, pct: 50, color: "#f43f5e", gradient: "linear-gradient(90deg, #f43f5e, #ec4899)" },
         ].map((c, i) => (
           <div key={c.name} className="flex items-center gap-3 mb-3.5 last:mb-0">

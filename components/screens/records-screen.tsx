@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Filter, Repeat2, Edit3, Trash2 } from "lucide-react"
+import { useState, useMemo, useEffect } from "react"
+import { Info, Plus, Edit2, Filter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useData } from "@/lib/data-context"
 
-const filters = ["全部", "水", "咖啡", "茶饮", "奶茶", "果汁", "碳酸", "能量", "酒精", "自定义"]
+interface RecordsScreenProps {
+  onAddClick?: () => void
+}
 
 const categoryConfig: Record<string, { bg: string, accent: string, icon: string, gradient: string }> = {
   "水": { bg: "#eff6ff", accent: "#3b82f6", icon: "💧", gradient: "linear-gradient(90deg, #3b82f6, #06b6d4)" },
@@ -19,65 +21,75 @@ const categoryConfig: Record<string, { bg: string, accent: string, icon: string,
   "自定义": { bg: "#f0f9ff", accent: "#0ea5e9", icon: "🥛", gradient: "linear-gradient(90deg, #0ea5e9, #0284c7)" },
 }
 
-export function RecordsScreen() {
-  const [activeFilter, setActiveFilter] = useState("全部")
-  const [showFilters, setShowFilters] = useState(false)
-  const { drinkRecords, loading, refresh, deleteDrinkRecord } = useData()
+const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
-  const recordsByDay = useMemo(() => {
-    const grouped: Record<string, any[]> = {}
+export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
+  const { drinkRecords, loading, userProfile } = useData()
+  const [selectedDate, setSelectedDate] = useState(new Date())
+
+  const calendarDays = useMemo(() => {
+    const days = []
+    for (let i = -3; i <= 3; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() + i)
+      days.push({
+        date: date.getDate().toString().padStart(2, '0'),
+        day: weekDays[date.getDay()],
+        fullDate: date,
+        isToday: i === 0,
+      })
+    }
+    return days
+  }, [])
+
+  const filteredRecords = useMemo(() => {
+    const startOfDay = new Date(selectedDate)
+    startOfDay.setHours(0, 0, 0, 0)
     
-    drinkRecords.forEach(record => {
-      const date = new Date(record.drink_time)
-      const dateKey = date.toDateString()
+    const endOfDay = new Date(selectedDate)
+    endOfDay.setHours(23, 59, 59, 999)
+
+    return drinkRecords.filter(record => {
+      const recordDate = new Date(record.drink_time)
+      return recordDate >= startOfDay && recordDate <= endOfDay
+    }).map(record => {
+      const config = categoryConfig[record.category] || categoryConfig["自定义"]
+      const time = new Date(record.drink_time)
+      const timeStr = time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
       
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = []
-      }
-      grouped[dateKey].push(record)
-    })
-
-    return Object.entries(grouped).map(([dateKey, records]) => {
-      const date = new Date(dateKey)
-      const today = new Date()
-      const yesterday = new Date(today)
-      yesterday.setDate(yesterday.getDate() - 1)
-
-      let dateStr
-      if (date.toDateString() === today.toDateString()) {
-        dateStr = `今天 · ${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
-      } else if (date.toDateString() === yesterday.toDateString()) {
-        dateStr = `昨天 · ${date.getMonth() + 1}月${date.getDate()}日`
-      } else {
-        dateStr = `${date.getMonth() + 1}月${date.getDate()}日 · ${date.getFullYear()}年`
-      }
-
-      const total = records.reduce((sum, r) => sum + r.volume, 0)
-
       return {
-        date: dateStr,
-        total: `${total.toLocaleString()} ml`,
-        records: records.map(r => {
-          const config = categoryConfig[r.category] || categoryConfig["自定义"]
-          const time = new Date(r.drink_time)
-          const timeStr = time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-          
-          return {
-            ...r,
-            time: timeStr,
-            bg: config.bg,
-            accent: r.accent_color || config.accent,
-            icon: r.icon || config.icon,
-            gradient: config.gradient,
-          }
-        })
+        ...record,
+        time: timeStr,
+        bg: config.bg,
+        accent: record.accent_color || config.accent,
+        icon: record.icon || config.icon,
+        gradient: config.gradient,
       }
-    }).sort((a, b) => {
-      const aFirst = a.records[0]?.drink_time || ''
-      const bFirst = b.records[0]?.drink_time || ''
-      return new Date(bFirst).getTime() - new Date(aFirst).getTime()
+    }).sort((a, b) => new Date(b.drink_time).getTime() - new Date(a.drink_time).getTime())
+  }, [drinkRecords, selectedDate])
+
+  const dailyStats = useMemo(() => {
+    const totalVolume = filteredRecords.reduce((sum, r) => sum + r.volume, 0)
+    const categoryCounts: Record<string, number> = {}
+    
+    filteredRecords.forEach(r => {
+      categoryCounts[r.category] = (categoryCounts[r.category] || 0) + 1
     })
-  }, [drinkRecords])
+
+    const topCategories = Object.entries(categoryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, count]) => ({
+        category,
+        count,
+        icon: categoryConfig[category]?.icon || '🥤'
+      }))
+
+    return {
+      totalVolume,
+      totalCount: filteredRecords.length,
+      topCategories
+    }
+  }, [filteredRecords])
 
   if (loading) {
     return (
@@ -90,124 +102,137 @@ export function RecordsScreen() {
 
   return (
     <div className="flex flex-col gap-6 pb-4">
-
       <div className="flex items-center justify-between pt-1">
         <div>
           <p className="text-sm text-slate-400 font-medium">我的饮品日志</p>
           <h1 className="text-xl font-bold text-foreground mt-0.5">点滴录SipArchive</h1>
         </div>
-        <button 
-          onClick={() => setShowFilters(!showFilters)}
-          className="w-10 h-10 flex items-center justify-center rounded-2xl" 
-          style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
-          <Filter size={16} className="text-slate-500" />
-        </button>
+        <div className="w-10 h-10 rounded-full bg-white shadow-lg border border-white/80 flex items-center justify-center">
+          <Filter className="w-5 h-5 text-slate-700" />
+        </div>
       </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-          {filters.map(f => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={cn(
-                "flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all",
-                activeFilter === f ? "text-white" : "text-slate-600"
-              )}
-              style={activeFilter === f 
-                ? { background: categoryConfig[f === "全部" ? "水" : f]?.gradient || categoryConfig["水"].gradient, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }
-                : { background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.4)' }
-              }
+      <div>
+        <div className="flex justify-between items-center gap-1.5 mb-5">
+          {calendarDays.map((item, idx) => (
+            <div
+              key={idx}
+              onClick={() => setSelectedDate(item.fullDate)}
+              className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl flex-1 cursor-pointer transition-all ${
+                item.fullDate.toDateString() === selectedDate.toDateString()
+                  ? 'bg-slate-900 text-white shadow-lg'
+                  : 'bg-white/60 backdrop-blur-md border border-white/50 text-slate-600'
+              }`}
             >
-              {f}
-            </button>
+              <span className={`text-sm font-bold ${item.fullDate.toDateString() === selectedDate.toDateString() ? 'text-white' : 'text-slate-800'}`}>{item.date}</span>
+              <span className={`text-[9px] mt-0.5 ${item.fullDate.toDateString() === selectedDate.toDateString() ? 'text-slate-300' : 'text-slate-500'}`}>{item.day}</span>
+            </div>
           ))}
         </div>
-      )}
 
-      {/* Records */}
-      {recordsByDay.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-4">
-          <div className="text-6xl">🍵</div>
-          <div className="text-center">
-            <p className="text-sm font-semibold text-slate-600">还没有饮品记录</p>
-            <p className="text-xs text-slate-400 mt-1">点击首页的"手动添加"开始记录</p>
-          </div>
-        </div>
-      ) : (
-        recordsByDay.map(day => (
-          <div key={day.date}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-slate-400">{day.date}</span>
-              <span className="text-xs font-bold text-blue-500">{day.total}</span>
+        <div className="space-y-3 mb-2">
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="flex items-center gap-1 mb-0.5">
+                <span className="text-sm font-bold text-slate-800">每日饮用量</span>
+                <Info className="w-3.5 h-3.5 text-slate-400" />
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-slate-900">{dailyStats.totalVolume}</span>
+                <span className="text-xs text-slate-400 flex items-center gap-1">
+                  /{userProfile?.daily_water_goal || 2000}ml <Edit2 className="w-3 h-3" />
+                </span>
+              </div>
             </div>
+            <button 
+              onClick={onAddClick}
+              className="bg-white/80 backdrop-blur-md border border-white/60 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:bg-white transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> 添加记录
+            </button>
+          </div>
 
-            <div className="flex flex-col gap-3">
-              {day.records
-                .filter(r => activeFilter === "全部" || r.category === activeFilter)
-                .map(record => (
-                <div key={record.id} className="overflow-hidden rounded-2xl" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
-                  {/* Top color strip */}
-                  <div className="h-1 w-full" style={{ background: record.gradient }} />
-                  <div className="px-4 py-3.5 flex items-center gap-3.5">
-                    {/* Icon */}
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                      {record.icon}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-bold text-foreground truncate">{record.name}</p>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold flex-shrink-0"
-                          style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))', color: record.accent, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                          {record.category}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 mb-2">{record.brand} · {record.time}</p>
-                      {/* Nutrition tags */}
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {[
-                          { val: `${record.volume}ml`,         color: "#3b82f6", bg: "#eff6ff" },
-                          { val: `${record.calories || 0}kcal`,     color: "#f43f5e", bg: "#fff1f2" },
-                          { val: `${record.caffeine || 0}mg咖啡因`, color: "#f97316", bg: "#fff7ed" },
-                          { val: `${record.sugar || 0}g糖`,         color: "#8b5cf6", bg: "#fdf4ff" },
-                        ].map((s, i) => (
-                          <span key={i} className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                            style={{ background: s.bg, color: s.color }}>
-                            {s.val}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex flex-col gap-2 flex-shrink-0">
-                      <button className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
-                        <Repeat2 size={13} className="text-blue-500" />
-                      </button>
-                      <button className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
-                        <Edit3 size={13} className="text-slate-400" />
-                      </button>
-                      <button 
-                        className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}
-                        onClick={() => deleteDrinkRecord(record.id)}
-                      >
-                        <Trash2 size={13} className="text-red-400" />
-                      </button>
-                    </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+            <div className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-xl p-2 w-20 border border-white/60 flex flex-col justify-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
+              <span className="text-[10px] text-slate-600 font-medium mb-0.5">总计</span>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-base font-bold text-slate-800">{dailyStats.totalCount}</span>
+                <span className="text-[9px] text-slate-400">/杯</span>
+              </div>
+            </div>
+            
+            {dailyStats.topCategories.map((cat, idx) => (
+              <div key={idx} className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-xl p-2 w-28 border border-white/60 flex justify-between items-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
+                <div>
+                  <span className="text-[10px] text-slate-600 font-medium mb-0.5 block">{cat.category}</span>
+                  <div className="flex items-baseline gap-0.5">
+                    <span className="text-base font-bold text-slate-800">{cat.count}</span>
+                    <span className="text-[9px] text-slate-400">/杯</span>
                   </div>
                 </div>
-              ))}
+                <span className="text-lg">{cat.icon}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-1 mb-3">
+          <h2 className="text-base font-bold text-slate-800">今日饮品</h2>
+        </div>
+
+        {filteredRecords.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-4">
+            <div className="text-6xl">🍵</div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-slate-600">还没有饮品记录</p>
+              <p className="text-xs text-slate-400 mt-1">点击首页的"手动添加"开始记录</p>
             </div>
           </div>
-        ))
-      )}
+        ) : (
+          <div className="space-y-3">
+            {filteredRecords.map((record) => (
+              <div
+                key={record.id}
+                className="relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] rounded-2xl p-4 transition-transform hover:scale-[1.02]"
+              >
+                <div className="flex justify-between items-start mb-3 relative z-10">
+                  <div className="pr-14">
+                    <h3 className="text-base font-bold text-slate-800 mb-0.5">{record.name}</h3>
+                    <p className="text-[11px] text-slate-500 mb-1.5 font-medium">
+                      {record.brand || '自定义'} <span className="mx-1 text-slate-300">|</span> {record.volume}ml
+                    </p>
+                    <span className="inline-block px-2 py-0.5 rounded-full border text-[9px] font-medium backdrop-blur-md bg-[#FAF6F3]/60 border-[#D4C4B7] text-[#8C7A6B]">
+                      {record.category}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="absolute -top-2 -right-2 w-20 h-20 z-0">
+                  <div className="absolute inset-0 rounded-full border border-dashed border-slate-300/60 m-1"></div>
+                  <div className="absolute inset-2.5 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-md shadow-sm border border-white/80 flex items-center justify-center text-3xl">
+                    {record.icon}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 relative z-10">
+                  {[
+                    { label: '热量', value: record.calories || 0, unit: 'Kcal' },
+                    { label: '糖分', value: record.sugar || 0, unit: 'g' },
+                    { label: '咖啡因', value: record.caffeine || 0, unit: 'mg' },
+                  ].map((stat, index) => (
+                    <div key={index} className="bg-white/50 backdrop-blur-md rounded-xl p-2 border border-white/40 shadow-sm flex flex-col justify-center">
+                      <p className="text-[9px] text-slate-500 mb-0.5 font-medium">{stat.label}</p>
+                      <p className="font-bold text-slate-800 text-sm flex items-baseline gap-0.5 leading-none">
+                        {stat.value} <span className="text-[8px] font-normal text-slate-500">{stat.unit}</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
