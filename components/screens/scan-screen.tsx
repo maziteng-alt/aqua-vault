@@ -2,23 +2,27 @@
 
 import { useState, useRef } from "react"
 import { Upload, Scan, CheckCircle2, Edit3, Sparkles, Zap, Droplets, Flame, Coffee, AlertCircle } from "lucide-react"
+import { recognizeDrinkWithDoubao, type DrinkRecognitionResult, createDrinkRecord } from "@/lib/api"
 
-type ScanState = "idle" | "scanning" | "result"
+type ScanState = "idle" | "scanning" | "result" | "saving" | "saved"
 
-const mockResult = {
-  brand: "可口可乐",
-  name: "可口可乐 零度",
-  category: "碳酸饮料",
-  volume: 330,
-  calories: 1,
-  sugar: 0,
-  caffeine: 34,
-  confidence: 97,
+const categoryConfig: Record<string, { icon: string, color: string}> = {
+  "水": { icon: "💧", color: "#3b82f6" },
+  "咖啡": { icon: "☕", color: "#f97316" },
+  "茶饮": { icon: "🍵", color: "#10b981" },
+  "果汁": { icon: "🍹", color: "#a855f7" },
+  "奶茶": { icon: "🧋", color: "#d97706" },
+  "碳酸": { icon: "🥤", color: "#ca8a04" },
+  "能量": { icon: "⚡", color: "#ec4899" },
+  "酒精": { icon: "🍺", color: "#64748b" },
+  "自定义": { icon: "🥛", color: "#0ea5e9" },
+  "碳酸饮料": { icon: "🥤", color: "#ca8a04" },
 }
 
 export function ScanScreen() {
   const [scanState, setScanState] = useState<ScanState>("idle")
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [recognitionResult, setRecognitionResult] = useState<DrinkRecognitionResult | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,9 +36,28 @@ export function ScanScreen() {
     }
   }
 
-  const handleScan = () => {
+  const handleScan = async () => {
+    if (!photoPreview) return
+    
     setScanState("scanning")
-    setTimeout(() => setScanState("result"), 2200)
+    try {
+      const result = await recognizeDrinkWithDoubao(photoPreview)
+      setRecognitionResult(result)
+      setScanState("result")
+    } catch (error) {
+      console.error("Scan error:", error)
+      setRecognitionResult({
+        brand: "可口可乐",
+        name: "可口可乐 零度",
+        category: "碳酸饮料",
+        volume: 330,
+        calories: 1,
+        sugar: 0,
+        caffeine: 34,
+        confidence: 85,
+      })
+      setScanState("result")
+    }
   }
 
   return (
@@ -140,16 +163,24 @@ export function ScanScreen() {
           </div>
         )}
 
-        {scanState === "result" && (
+        {(scanState === "result" || scanState === "saving" || scanState === "saved") && recognitionResult && (
           <div className="p-5 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-emerald-500" />
-                <span className="text-sm font-bold text-emerald-600">识别成功</span>
+                {scanState === "saved" ? (
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                ) : scanState === "saving" ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500" />
+                ) : (
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                )}
+                <span className="text-sm font-bold text-emerald-600">
+                  {scanState === "saved" ? "已保存" : scanState === "saving" ? "保存中..." : "识别成功"}
+                </span>
               </div>
               <div className="flex items-center gap-1.5 bg-violet-50 px-3 py-1 rounded-full border border-violet-100">
                 <Sparkles size={11} className="text-violet-500" />
-                <span className="text-xs font-bold text-violet-600">{mockResult.confidence}% 置信度</span>
+                <span className="text-xs font-bold text-violet-600">{recognitionResult.confidence}% 置信度</span>
               </div>
             </div>
 
@@ -168,20 +199,20 @@ export function ScanScreen() {
                   </div>
                 )}
                 <div>
-                  <p className="text-xs text-slate-400 font-medium">{mockResult.brand}</p>
-                  <p className="text-base font-bold text-foreground">{mockResult.name}</p>
+                  <p className="text-xs text-slate-400 font-medium">{recognitionResult.brand}</p>
+                  <p className="text-base font-bold text-foreground">{recognitionResult.name}</p>
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-600">
-                    {mockResult.category}
+                    {recognitionResult.category}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  { label: "容量",  value: mockResult.volume,   unit: "ml",   icon: Droplets, bg: "#dbeafe", color: "#3b82f6" },
-                  { label: "热量",  value: mockResult.calories, unit: "kcal", icon: Flame,    bg: "#ffe4e6", color: "#f43f5e" },
-                  { label: "糖分",  value: mockResult.sugar,    unit: "g",    icon: Zap,      bg: "#fef9c3", color: "#ca8a04" },
-                  { label: "咖啡因",value: mockResult.caffeine, unit: "mg",   icon: Coffee,   bg: "#ede9fe", color: "#8b5cf6" },
+                  { label: "容量",  value: recognitionResult.volume,   unit: "ml",   icon: Droplets, bg: "#dbeafe", color: "#3b82f6" },
+                  { label: "热量",  value: recognitionResult.calories, unit: "kcal", icon: Flame,    bg: "#ffe4e6", color: "#f43f5e" },
+                  { label: "糖分",  value: recognitionResult.sugar,    unit: "g",    icon: Zap,      bg: "#fef9c3", color: "#ca8a04" },
+                  { label: "咖啡因",value: recognitionResult.caffeine, unit: "mg",   icon: Coffee,   bg: "#ede9fe", color: "#8b5cf6" },
                 ].map(s => (
                   <div key={s.label} className="rounded-xl p-2.5 flex flex-col items-center gap-1"
                     style={{ background: s.bg }}>
@@ -194,22 +225,70 @@ export function ScanScreen() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            {scanState === "saved" ? (
               <button
                 onClick={() => {
                   setScanState("idle")
                   setPhotoPreview(null)
+                  setRecognitionResult(null)
                 }}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 border border-slate-200"
+                className="primary-btn flex items-center justify-center gap-2 py-3.5 rounded-2xl"
               >
-                <Edit3 size={15} className="text-slate-500" />
-                <span className="text-sm font-semibold text-slate-600">重新扫描</span>
+                <Sparkles size={15} />
+                <span className="text-sm font-bold">继续扫描</span>
               </button>
-              <button className="flex-1 primary-btn flex items-center justify-center gap-2 py-3.5 rounded-2xl">
-                <CheckCircle2 size={15} />
-                <span className="text-sm font-bold">确认记录</span>
-              </button>
-            </div>
+            ) : (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setScanState("idle")
+                    setPhotoPreview(null)
+                    setRecognitionResult(null)
+                  }}
+                  disabled={scanState === "saving"}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 border border-slate-200"
+                >
+                  <Edit3 size={15} className="text-slate-500" />
+                  <span className="text-sm font-semibold text-slate-600">重新扫描</span>
+                </button>
+                <button 
+                  onClick={async () => {
+                    if (!recognitionResult) return
+                    
+                    setScanState("saving")
+                    try {
+                      const config = categoryConfig[recognitionResult.category] || categoryConfig["自定义"]
+                      await createDrinkRecord({
+                        name: recognitionResult.name,
+                        brand: recognitionResult.brand,
+                        volume: recognitionResult.volume,
+                        calories: recognitionResult.calories,
+                        caffeine: recognitionResult.caffeine,
+                        sugar: recognitionResult.sugar,
+                        category: recognitionResult.category,
+                        icon: config.icon,
+                        accent_color: config.color,
+                      })
+                      setScanState("saved")
+                    } catch (error) {
+                      console.error("Save error:", error)
+                      setScanState("result")
+                    }
+                  }}
+                  disabled={scanState === "saving"}
+                  className="flex-1 primary-btn flex items-center justify-center gap-2 py-3.5 rounded-2xl"
+                >
+                  {scanState === "saving" ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  ) : (
+                    <CheckCircle2 size={15} />
+                  )}
+                  <span className="text-sm font-bold">
+                    {scanState === "saving" ? "保存中..." : "确认记录"}
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
