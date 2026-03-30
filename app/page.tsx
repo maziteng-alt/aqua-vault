@@ -101,9 +101,9 @@ export default function App() {
       case "scan":
         return (
           <div className="flex flex-col gap-5">
-            <div className="flex gap-2 p-1 bg-white rounded-2xl border border-border shadow-sm">
+            <div className="flex gap-2 p-1 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/40 shadow-sm">
               <button
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/60 backdrop-blur-xl border border-blue-200 text-blue-700 shadow-sm"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/40 backdrop-blur-md border border-blue-200/60 text-blue-700 shadow-sm"
               >
                 AI 扫描识别
               </button>
@@ -120,7 +120,7 @@ export default function App() {
       case "add":
         return (
           <div className="flex flex-col gap-5">
-            <div className="flex gap-2 p-1 bg-white rounded-2xl border border-border shadow-sm">
+            <div className="flex gap-2 p-1 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/40 shadow-sm">
               <button
                 onClick={function() { handleTabChange("scan") }}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-400"
@@ -128,7 +128,7 @@ export default function App() {
                 AI 扫描识别
               </button>
               <button
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/60 backdrop-blur-xl border border-violet-200 text-violet-700 shadow-sm"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/40 backdrop-blur-md border border-violet-200/60 text-violet-700 shadow-sm"
               >
                 手动添加
               </button>

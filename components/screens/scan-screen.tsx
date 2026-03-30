@@ -70,7 +70,7 @@ export function ScanScreen() {
       </div>
 
       {/* Scan area */}
-      <div className="bright-card overflow-hidden">
+      <div className="bright-card overflow-hidden bg-white/40 border-white/30">
 
         {scanState === "idle" && (
           <div className="flex flex-col items-center gap-5 p-8">
@@ -91,21 +91,21 @@ export function ScanScreen() {
                   <img
                     src={photoPreview}
                     alt="饮品包装"
-                    className="w-44 h-44 rounded-3xl object-cover shadow-md border-2 border-blue-200"
+                    className="w-44 h-44 rounded-3xl object-cover shadow-md border-2 border-blue-200/70"
                   />
                   <button 
                     onClick={(e) => {
                       e.stopPropagation()
                       setPhotoPreview(null)
                     }}
-                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500 flex items-center justify-center shadow-md text-white"
+                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500/90 flex items-center justify-center shadow-md text-white"
                   >
                     ×
                   </button>
                 </div>
               ) : (
                 <div className="w-36 h-36 rounded-3xl flex items-center justify-center"
-                  style={{ background: '#eff6ff', border: '2px dashed #93c5fd' }}>
+                  style={{ background: 'rgba(239, 246, 255, 0.6)', border: '2px dashed rgba(147, 197, 253, 0.8)' }}>
                   <Upload size={40} className="text-blue-400" />
                 </div>
               )}
@@ -122,7 +122,7 @@ export function ScanScreen() {
               className={`px-8 py-3.5 rounded-2xl text-sm font-bold ${
                 photoPreview 
                   ? "primary-btn" 
-                  : "bg-slate-300 cursor-not-allowed"
+                  : "bg-slate-300/70 cursor-not-allowed"
               }`}
             >
               开始 AI 识别
@@ -311,7 +311,7 @@ export function ScanScreen() {
 
       {/* Tip */}
       <div className="bright-card p-4 flex items-start gap-3"
-        style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
+        style={{ background: 'rgba(255, 251, 235, 0.6)', borderColor: 'rgba(253, 230, 138, 0.7)' }}>
         <AlertCircle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-bold text-amber-700 mb-1">拍摄小贴士</p>
