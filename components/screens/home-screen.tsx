@@ -371,12 +371,12 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm font-bold text-foreground truncate">{drink.name}</p>
+                  <p className="text-sm font-bold text-foreground truncate">{drink.name.replace(/\s*\(杯子\)/, '')}</p>
                   <span className="glass-inner text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0" style={{ color: drink.accent }}>
                     {drink.category}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400">{drink.brand} · {drink.time}</p>
+                <p className="text-xs text-slate-400">{drink.name.includes('(杯子)') ? '杯子' : drink.brand} · {drink.time}</p>
               </div>
               <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
                 <span className="text-sm font-bold text-foreground">{drink.volume} ml</span>

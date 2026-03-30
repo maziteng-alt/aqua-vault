@@ -267,9 +267,11 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
                 
                 <div className="flex justify-between items-start mb-3 relative z-10">
                   <div className="pr-14">
-                    <h3 className="text-base font-bold text-slate-800 mb-0.5">{record.name}</h3>
+                    <h3 className="text-base font-bold text-slate-800 mb-0.5">
+                      {record.name.replace(/\s*\(杯子\)/, '')}
+                    </h3>
                     <p className="text-[11px] text-slate-500 mb-1.5 font-medium">
-                      {record.brand || '自定义'} <span className="mx-1 text-slate-300">|</span> {record.volume}ml
+                      {record.name.includes('(杯子)') ? '杯子' : (record.brand || '自定义')} <span className="mx-1 text-slate-300">|</span> {record.volume}ml
                     </p>
                     <span className="inline-block px-2 py-0.5 rounded-full border text-[9px] font-medium backdrop-blur-md bg-[#FAF6F3]/60 border-[#D4C4B7] text-[#8C7A6B]">
                       {record.category}
