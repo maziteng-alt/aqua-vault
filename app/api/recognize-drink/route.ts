@@ -44,6 +44,39 @@ function normalizeCategory(category: string): string {
   return "自定义"
 }
 
+function extractNutritionFromText(text: string) {
+  const result = { calories: 0, sugar: 0, caffeine: 0 }
+  
+  const calorieMatch = text.match(/(\d+)\s*(?:千卡|kcal|卡路里|热量)/i)
+  if (calorieMatch) {
+    result.calories = parseInt(calorieMatch[1])
+  }
+  
+  const sugarMatch = text.match(/(\d+)\s*(?:克|g)\s*(?:糖|糖分)/i)
+  if (sugarMatch) {
+    result.sugar = parseInt(sugarMatch[1])
+  }
+  
+  const caffeineMatch = text.match(/(\d+)\s*(?:mg|毫克)\s*(?:咖啡因)/i)
+  if (caffeineMatch) {
+    result.caffeine = parseInt(caffeineMatch[1])
+  }
+  
+  return result
+}
+
+async function searchNutritionInfo(brand: string, name: string): Promise<{ calories: number, sugar: number, caffeine: number }> {
+  try {
+    const searchQuery = `${brand} ${name} 营养成分 热量 糖分 咖啡因`
+    console.log("Searching for:", searchQuery)
+    
+    return { calories: 0, sugar: 0, caffeine: 0 }
+  } catch (error) {
+    console.error("Search error:", error)
+    return { calories: 0, sugar: 0, caffeine: 0 }
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { image } = await request.json()
@@ -66,15 +99,24 @@ export async function POST(request: NextRequest) {
               },
               {
                 type: "input_text",
-                text: `请识别这张饮品图片，分析其中的营养成分信息。
+                text: `请识别这张饮品图片，提取以下信息：
 
-首先判断饮品的category（分类），必须严格从以下选项中选择一个：水、咖啡、茶饮、果汁、奶茶、碳酸、能量、酒精、自定义。
+1. 品牌名称（brand）
+2. 饮品完整名称（name）
+3. 分类（category）- 必须严格从以下选项中选择一个：水、咖啡、茶饮、果汁、奶茶、碳酸、能量、酒精、自定义
+4. 容量（volume）- 毫升数
+5. 营养成分：
+   - 热量（calories）- 千卡/kcal
+   - 糖分（sugar）- 克/g
+   - 咖啡因（caffeine）- 毫克/mg
+
+请仔细观察图片上的营养成分表、配料表或任何标注数值的地方，提取准确的数值。
 
 请按照以下JSON格式返回结果，不要包含任何其他文本：
 {
   "brand": "品牌名称",
   "name": "饮品完整名称",
-  "category": "分类（必须是：水/咖啡/茶饮/果汁/奶茶/碳酸/能量/酒精/自定义）",
+  "category": "分类",
   "volume": 容量数值(ml),
   "calories": 热量数值(kcal),
   "sugar": 糖分数值(g),
@@ -93,7 +135,7 @@ category说明：
 - 酒精：各种酒类（啤酒、白酒、红酒等）
 - 自定义：其他无法归类的饮品
 
-如果某些信息无法识别，请使用合理的默认值。`,
+如果某些信息无法识别，请使用合理的默认值（可以根据饮品类型估算，但优先使用图片上能看到的真实数值）。`,
               },
             ],
           },
@@ -136,11 +178,16 @@ category说明：
     
     const parsed = JSON.parse(jsonMatch[0])
     
+    const brand = parsed.brand || "未知品牌"
+    const name = parsed.name || "未知饮品"
+    const category = normalizeCategory(parsed.category)
+    const volume = Number(parsed.volume) || 500
+    
     return NextResponse.json({
-      brand: parsed.brand || "未知品牌",
-      name: parsed.name || "未知饮品",
-      category: normalizeCategory(parsed.category),
-      volume: Number(parsed.volume) || 500,
+      brand,
+      name,
+      category,
+      volume,
       calories: Number(parsed.calories) || 0,
       sugar: Number(parsed.sugar) || 0,
       caffeine: Number(parsed.caffeine) || 0,
