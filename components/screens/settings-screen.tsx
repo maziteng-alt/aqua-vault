@@ -1,22 +1,155 @@
 "use client"
 
-import { useState } from "react"
-import { Eye, EyeOff, Wifi, WifiOff, Shield, Sliders, MessageSquare, Thermometer, Hash, ImageIcon } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Eye, EyeOff, Wifi, WifiOff, Shield, Sliders, MessageSquare, Thermometer, Hash, ImageIcon, Droplet, Coffee, Zap, Flame } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useData } from "@/lib/data-context"
 
 export function SettingsScreen() {
+  const { userProfile, updateUserProfile } = useData()
   const [showApiKey, setShowApiKey] = useState(false)
   const [imageAnalysis, setImageAnalysis] = useState(true)
   const [selectedModel, setSelectedModel] = useState("gpt-4o")
   const [testStatus, setTestStatus] = useState<"idle" | "testing" | "ok" | "fail">("idle")
+  const [saving, setSaving] = useState(false)
+  
+  const [dailyWaterGoal, setDailyWaterGoal] = useState(2000)
+  const [dailyCaffeineLimit, setDailyCaffeineLimit] = useState(400)
+  const [dailyCalorieGoal, setDailyCalorieGoal] = useState(2000)
+  const [dailySugarLimit, setDailySugarLimit] = useState(50)
+
+  useEffect(() => {
+    if (userProfile) {
+      setDailyWaterGoal(userProfile.daily_water_goal || 2000)
+      setDailyCaffeineLimit(userProfile.daily_caffeine_limit || 400)
+      setDailyCalorieGoal(userProfile.daily_calorie_goal || 2000)
+      setDailySugarLimit(userProfile.daily_sugar_limit || 50)
+    }
+  }, [userProfile])
 
   const handleTest = () => {
     setTestStatus("testing")
     setTimeout(() => setTestStatus("ok"), 1800)
   }
 
+  const handleSaveGoals = async () => {
+    try {
+      setSaving(true)
+      await updateUserProfile({
+        daily_water_goal: dailyWaterGoal,
+        daily_caffeine_limit: dailyCaffeineLimit,
+        daily_calorie_goal: dailyCalorieGoal,
+        daily_sugar_limit: dailySugarLimit,
+      })
+      alert("目标设置已保存！")
+    } catch (error) {
+      console.error("Failed to save goals:", error)
+      alert("保存失败，请重试")
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 pb-4">
+
+      <div className="pt-1">
+        <p className="text-sm text-slate-400 font-medium">目标设置</p>
+        <h1 className="text-2xl font-bold text-foreground mt-0.5">每日目标与限制</h1>
+      </div>
+
+      {/* Daily Water Goal */}
+      <div className="bright-card p-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Droplet size={13} style={{ color: '#2895FF' }} />
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">每日饮水量目标</label>
+        </div>
+        <input
+          type="number"
+          min="500"
+          max="5000"
+          step="100"
+          className="input-bright w-full px-4 py-3 text-sm"
+          value={dailyWaterGoal}
+          onChange={(e) => setDailyWaterGoal(Number(e.target.value))}
+        />
+        <p className="text-[11px] text-slate-400">推荐：2000 - 2500 ml/天</p>
+      </div>
+
+      {/* Daily Caffeine Limit */}
+      <div className="bright-card p-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Coffee size={13} style={{ color: '#7D4141' }} />
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">每日咖啡因限制</label>
+        </div>
+        <input
+          type="number"
+          min="0"
+          max="1000"
+          step="50"
+          className="input-bright w-full px-4 py-3 text-sm"
+          value={dailyCaffeineLimit}
+          onChange={(e) => setDailyCaffeineLimit(Number(e.target.value))}
+        />
+        <p className="text-[11px] text-slate-400">健康建议：不超过 400 mg/天</p>
+      </div>
+
+      {/* Daily Calorie Limit */}
+      <div className="bright-card p-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Flame size={13} style={{ color: '#F75D72' }} />
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">每日热量限制</label>
+        </div>
+        <input
+          type="number"
+          min="1000"
+          max="5000"
+          step="100"
+          className="input-bright w-full px-4 py-3 text-sm"
+          value={dailyCalorieGoal}
+          onChange={(e) => setDailyCalorieGoal(Number(e.target.value))}
+        />
+        <p className="text-[11px] text-slate-400">健康建议：不超过200kcal/天</p>
+      </div>
+
+      {/* Daily Sugar Limit */}
+      <div className="bright-card p-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Zap size={13} className="text-purple-500" />
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">每日糖分限制</label>
+        </div>
+        <input
+          type="number"
+          min="0"
+          max="200"
+          step="5"
+          className="input-bright w-full px-4 py-3 text-sm"
+          value={dailySugarLimit}
+          onChange={(e) => setDailySugarLimit(Number(e.target.value))}
+        />
+        <p className="text-[11px] text-slate-400">WHO建议：不超过 50 g/天</p>
+      </div>
+
+      {/* Save Goals Button */}
+      <button
+        onClick={handleSaveGoals}
+        disabled={saving}
+        className={cn(
+          "w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold transition-all primary-btn",
+          saving && "opacity-70 cursor-wait"
+        )}
+      >
+        {saving ? (
+          <>
+            <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            <span>保存中...</span>
+          </>
+        ) : (
+          <span>保存目标设置</span>
+        )}
+      </button>
+
+      <div className="h-px bg-slate-200" />
 
       <div className="pt-1">
         <p className="text-sm text-slate-400 font-medium">AI 配置</p>

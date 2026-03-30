@@ -9,13 +9,40 @@ import { AddRecordScreen } from "@/components/screens/add-record-screen"
 import { RecordsScreen } from "@/components/screens/records-screen"
 import { CupsScreen } from "@/components/screens/cups-screen"
 import { AddCupScreen } from "@/components/screens/add-cup-screen"
+import { UseCupScreen } from "@/components/screens/use-cup-screen"
 import { InsightsScreen } from "@/components/screens/insights-screen"
 import { SettingsScreen } from "@/components/screens/settings-screen"
+import { LoginScreen } from "@/components/screens/login-screen"
+import { useData } from "@/lib/data-context"
+import * as api from "@/lib/api"
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("home")
   const [showAddCup, setShowAddCup] = useState(false)
+  const [useCup, setUseCup] = useState<{
+    id: string
+    name: string
+    capacity: number
+    icon?: string
+  } | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const scrollRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  const checkAuth = async () => {
+    try {
+      const user = await api.getCurrentUser()
+      setIsLoggedIn(!!user)
+    } catch (error) {
+      setIsLoggedIn(false)
+    } finally {
+      setCheckingAuth(false)
+    }
+  }
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab)
@@ -35,13 +62,31 @@ export default function App() {
   }
 
   const renderScreen = () => {
+    if (checkingAuth) {
+      return (
+        <div className="flex flex-col gap-6 pb-4 pt-20 items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <p className="text-sm text-slate-400">加载中...</p>
+        </div>
+      )
+    }
+
+    if (!isLoggedIn) {
+      return <LoginScreen onLogin={() => {
+        setIsLoggedIn(true)
+      }} />
+    }
+
     if (showAddCup) {
       return <AddCupScreen 
         onBack={() => setShowAddCup(false)} 
-        onSave={(cup) => {
-          console.log('Saved cup:', cup)
-          setShowAddCup(false)
-        }} 
+      />
+    }
+
+    if (useCup) {
+      return <UseCupScreen 
+        cup={useCup}
+        onBack={() => setUseCup(null)} 
       />
     }
 
@@ -56,6 +101,7 @@ export default function App() {
             setActiveTab("cups")
             setShowAddCup(true)
           }}
+          onUseCupClick={(cup) => setUseCup(cup)}
         />
       case "scan":
         return (
@@ -92,13 +138,16 @@ export default function App() {
                 手动添加
               </button>
             </div>
-            <AddRecordScreen />
+            <AddRecordScreen onBack={() => handleTabChange("home")} />
           </div>
         )
       case "records":
         return <RecordsScreen />
       case "cups":
-        return <CupsScreen onAddCupClick={() => setShowAddCup(true)} />
+        return <CupsScreen 
+          onAddCupClick={() => setShowAddCup(true)} 
+          onUseCupClick={(cup) => setUseCup(cup)}
+        />
       case "insights":
         return <InsightsScreen />
       case "settings":
@@ -113,6 +162,7 @@ export default function App() {
             setActiveTab("cups")
             setShowAddCup(true)
           }}
+          onUseCupClick={(cup) => setUseCup(cup)}
         />
     }
   }
@@ -137,7 +187,9 @@ export default function App() {
           </div>
         </main>
 
-        <TabBar activeTab={activeTab === "add" ? "scan" : activeTab} onTabChange={handleTabChange} />
+        {isLoggedIn && (
+          <TabBar activeTab={activeTab === "add" ? "scan" : activeTab} onTabChange={handleTabChange} />
+        )}
       </div>
     </div>
   )

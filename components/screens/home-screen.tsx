@@ -1,18 +1,20 @@
 "use client"
 
-import { Droplets, Coffee, Zap, Flame, Camera, GlassWater, PenLine, ChevronRight, Sparkles, TrendingUp } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Droplet, Coffee, Flame, Zap, Camera, GlassWater, PenLine, ChevronRight, Sparkles, TrendingUp } from "lucide-react"
+import { useData } from "@/lib/data-context"
 
-const recentDrinks = [
-  { id: 1, name: "美式咖啡", brand: "星巴克", time: "09:24", volume: 350, calories: 15, caffeine: 150, category: "咖啡", bg: "#fff7ed", accent: "#f97316", icon: "☕" },
-  { id: 2, name: "纯净水", brand: "农夫山泉", time: "11:05", volume: 500, calories: 0, caffeine: 0, category: "水", bg: "#eff6ff", accent: "#3b82f6", icon: "💧" },
-  { id: 3, name: "燕麦拿铁", brand: "瑞幸", time: "14:30", volume: 400, calories: 120, caffeine: 75, category: "咖啡", bg: "#fdf4ff", accent: "#a855f7", icon: "🥛" },
-]
-
-const favCups = [
-  { id: 1, name: "白熊保温杯", capacity: 500, bg: "#eff6ff", accent: "#3b82f6", icon: "🐻‍❄️" },
-  { id: 2, name: "咖啡随行杯", capacity: 350, bg: "#fff7ed", accent: "#f97316", icon: "☕" },
-  { id: 3, name: "玻璃茶杯",   capacity: 300, bg: "#f0fdf4", accent: "#10b981", icon: "🍵" },
-]
+const categoryConfig: Record<string, { bg: string, accent: string, icon: string }> = {
+  "水": { bg: "#eff6ff", accent: "#3b82f6", icon: "💧" },
+  "咖啡": { bg: "#fff7ed", accent: "#f97316", icon: "☕" },
+  "茶饮": { bg: "#f0fdf4", accent: "#10b981", icon: "🍵" },
+  "果汁": { bg: "#fdf4ff", accent: "#a855f7", icon: "🍹" },
+  "奶茶": { bg: "#fef3c7", accent: "#d97706", icon: "🧋" },
+  "碳酸": { bg: "#fef9c3", accent: "#ca8a04", icon: "🥤" },
+  "能量": { bg: "#fce7f3", accent: "#ec4899", icon: "⚡" },
+  "酒精": { bg: "#f1f5f9", accent: "#64748b", icon: "🍺" },
+  "自定义": { bg: "#f0f9ff", accent: "#0ea5e9", icon: "🥛" },
+}
 
 interface HomeScreenProps {
   onScanClick: () => void
@@ -20,16 +22,82 @@ interface HomeScreenProps {
   onViewAllRecordsClick: () => void
   onViewCupsClick: () => void
   onAddCupClick: () => void
+  onUseCupClick: (cup: { id: string; name: string; capacity: number; icon?: string }) => void
 }
 
-export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onViewCupsClick, onAddCupClick }: HomeScreenProps) {
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 6) return "夜深了 🌙"
+  if (hour < 12) return "早上好 🌅"
+  if (hour < 14) return "中午好 ☀️"
+  if (hour < 18) return "下午好 🌤️"
+  return "晚上好 🌆"
+}
+
+export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onViewCupsClick, onAddCupClick, onUseCupClick }: HomeScreenProps) {
+  const { drinkRecords, cups, todayStats, userProfile, loading } = useData()
+  const [greeting, setGreeting] = useState(getGreeting())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setGreeting(getGreeting())
+    }, 60000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const dailyGoal = userProfile?.daily_water_goal || 2000
+  const progressPercent = Math.min((todayStats.totalVolume / dailyGoal) * 100, 100)
+  
+  const dailyCalorieGoal = userProfile?.daily_calorie_goal || 2000
+  const caloriePercent = Math.min((todayStats.totalCalories / dailyCalorieGoal) * 100, 100)
+  
+  const dailyCaffeineLimit = userProfile?.daily_caffeine_limit || 400
+  const caffeinePercent = Math.min((todayStats.totalCaffeine / dailyCaffeineLimit) * 100, 100)
+
+  const recentDrinks = drinkRecords.slice(0, 3).map(record => {
+    const config = categoryConfig[record.category] || categoryConfig["自定义"]
+    const time = new Date(record.drink_time)
+    const timeStr = time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    
+    return {
+      id: record.id,
+      name: record.name,
+      brand: record.brand || "",
+      time: timeStr,
+      volume: record.volume,
+      calories: record.calories || 0,
+      caffeine: record.caffeine || 0,
+      category: record.category,
+      bg: config.bg,
+      accent: record.accent_color || config.accent,
+      icon: record.icon || config.icon,
+    }
+  })
+
+  const favCups = cups.filter(cup => cup.is_favorite).slice(0, 3).map(cup => ({
+    id: cup.id,
+    name: cup.name,
+    capacity: cup.capacity,
+    bg: cup.background_color || "#eff6ff",
+    accent: cup.accent_color || "#3b82f6",
+    icon: cup.icon || "🥤",
+  }))
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6 pb-4 pt-10 items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <p className="text-sm text-slate-400">加载中...</p>
+      </div>
+    )
+  }
   return (
-    <div className="flex flex-col gap-6 pb-4">
+    <div className="flex flex-col gap-4 pb-4">
 
       {/* Header */}
-      <div className="flex items-center justify-between pt-3">
+      <div className="flex items-center justify-between pt-1">
         <div>
-          <p className="text-sm text-slate-400 font-medium">早上好 👋</p>
+          <p className="text-sm text-slate-400 font-medium">{greeting}</p>
           <h1 className="text-2xl font-bold text-foreground mt-0.5">今日水分补给</h1>
         </div>
         <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-xl shadow-md">
@@ -37,158 +105,103 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
         </div>
       </div>
 
-      {/* Hydration Hero Card */}
-      <div className="p-5 relative overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
-        {/* Subtle tinted top strip */}
-        <div className="absolute top-0 left-0 right-0 h-1 rounded-t-[1.25rem]"
-          style={{ background: 'linear-gradient(90deg, #3b82f6, #06b6d4)' }} />
+      {/* Hydration Hero Card{/* 今日统计卡片 */}
+      <div className="glass-inner p-4 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 relative overflow-hidden">
 
-        <div className="flex items-center gap-5 mt-1">
-          {/* Rings */}
-          <div className="relative flex-shrink-0">
-            <svg width="120" height="120" viewBox="0 0 120 120" className="-rotate-90">
+        {/* 半圆环图表 (Arch Chart) */}
+        <div className="flex justify-center mb-1 mt-2">
+          <div className="relative w-[280px] h-[150px]">
+            <svg width="280" height="150" viewBox="0 0 280 150">
               <defs>
-                {/* Water gradient - blue to cyan */}
                 <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#06b6d4" />
+                  <stop offset="0%" stopColor="#2895FF" />
+                  <stop offset="50%" stopColor="#62D9FF" />
+                  <stop offset="100%" stopColor="#58FFEB" />
                 </linearGradient>
-                {/* Calories gradient - red to pink */}
-                <linearGradient id="calorieGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#f43f5e" />
-                  <stop offset="100%" stopColor="#ec4899" />
-                </linearGradient>
-                {/* Caffeine gradient - orange to yellow */}
                 <linearGradient id="caffeineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#f97316" />
-                  <stop offset="100%" stopColor="#eab308" />
+                  <stop offset="0%" stopColor="#7D4141" />
+                  <stop offset="100%" stopColor="#FFEBBE" />
+                </linearGradient>
+                <linearGradient id="calorieGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#FE5196" />
+                  <stop offset="100%" stopColor="#F77062" />
                 </linearGradient>
               </defs>
-              
-              {/* Outer ring - Water */}
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#e2e8f8" strokeWidth="16" />
-              <circle
-                cx="60" cy="60" r="50"
-                fill="none"
-                stroke="url(#waterGrad)"
-                strokeWidth="16"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 50 * 0.68} ${2 * Math.PI * 50}`}
-              />
-              
-              {/* Middle ring - Calories */}
-              <circle cx="60" cy="60" r="32" fill="none" stroke="#fee2e2" strokeWidth="16" />
-              <circle
-                cx="60" cy="60" r="32"
-                fill="none"
-                stroke="url(#calorieGrad)"
-                strokeWidth="16"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 32 * 0.45} ${2 * Math.PI * 32}`}
-              />
-              
-              {/* Inner ring - Caffeine */}
-              <circle cx="60" cy="60" r="14" fill="none" stroke="#ffedd5" strokeWidth="16" />
-              <circle
-                cx="60" cy="60" r="14"
-                fill="none"
-                stroke="url(#caffeineGrad)"
-                strokeWidth="16"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 14 * 0.75} ${2 * Math.PI * 14}`}
-              />
+              {/* 背景圆环 */}
+              <path d="M 30 130 A 110 110 0 0 1 250 130" fill="none" stroke="#EBF0FF" strokeWidth="24" strokeLinecap="round" />
+              <path d="M 60 130 A 80 80 0 0 1 220 130" fill="none" stroke="#FFF0E5" strokeWidth="24" strokeLinecap="round" />
+              <path d="M 90 130 A 50 50 0 0 1 190 130" fill="none" stroke="#FFE5E5" strokeWidth="24" strokeLinecap="round" />
+
+              {/* 前景进度圆环 */}
+              {/* 水分 */}
+              <path d="M 30 130 A 110 110 0 0 1 250 130" fill="none" stroke="url(#waterGrad)" strokeWidth="24" strokeLinecap="round" strokeDasharray="345.57" strokeDashoffset={345.57 * (1 - progressPercent / 100)} />
+              {/* 咖啡因 */}
+              <path d="M 60 130 A 80 80 0 0 1 220 130" fill="none" stroke="url(#caffeineGrad)" strokeWidth="24" strokeLinecap="round" strokeDasharray="251.32" strokeDashoffset={251.32 * (1 - caffeinePercent / 100)} />
+              {/* 热量 */}
+              <path d="M 90 130 A 50 50 0 0 1 190 130" fill="none" stroke="url(#calorieGrad)" strokeWidth="24" strokeLinecap="round" strokeDasharray="157.08" strokeDashoffset={157.08 * (1 - caloriePercent / 100)} />
             </svg>
             
-            {/* Icons at 12 o'clock position */}
-            <div className="absolute inset-0">
-              {/* Water icon - outer ring */}
-              <div 
-                className="absolute rounded-full flex items-center justify-center"
-                style={{
-                  width: '16px',
-                  height: '16px',
-                  top: '2px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                </svg>
-              </div>
-              
-              {/* Calories icon - middle ring */}
-              <div 
-                className="absolute w-4 h-4 rounded-full flex items-center justify-center"
-                style={{
-                  top: '20px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'linear-gradient(135deg, #f43f5e, #ec4899)'
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-                </svg>
-              </div>
-              
-              {/* Caffeine icon - inner ring */}
-              <div 
-                className="absolute rounded-full flex items-center justify-center"
-                style={{
-                  width: '14px',
-                  height: '15px',
-                  top: '38px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'linear-gradient(135deg, #f97316, #eab308)'
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
-                  <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path>
-                  <path d="M6 1v3"></path>
-                  <path d="M10 1v3"></path>
-                  <path d="M14 1v3"></path>
-                </svg>
-              </div>
+            {/* 圆环起始位置的图标 */}
+            <div className="absolute left-[30px] top-[130px] -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <Droplet className="w-3.5 h-3.5" style={{ color: '#2895FF' }} />
             </div>
-          </div>
-
-          {/* Stats */}
-          <div className="flex-1 grid grid-cols-2 gap-2.5">
-            {[
-              { label: "总饮量",  value: "1,350", unit: "ml",   icon: Droplets, bg: "#eff6ff", color: "#3b82f6" },
-              { label: "咖啡因", value: "225",   unit: "mg",   icon: Coffee,   bg: "#fff7ed", color: "#f97316" },
-              { label: "糖分",   value: "18",    unit: "g",    icon: Zap,      bg: "#fdf4ff", color: "#a855f7" },
-              { label: "热量",   value: "135",   unit: "kcal", icon: Flame,    bg: "#fff1f2", color: "#f43f5e" },
-            ].map(s => (
-              <div key={s.label}
-                className="rounded-2xl px-3 py-2.5 flex flex-col gap-1"
-                style={{ background: s.bg }}>
-                <div className="flex items-center gap-1.5">
-                  <s.icon size={12} style={{ color: s.color }} />
-                  <span className="text-[10px] text-slate-400 font-medium">{s.label}</span>
-                </div>
-                <div className="flex items-baseline gap-0.5 justify-center">
-                  <span className="text-base font-extrabold" style={{ color: s.color }}>{s.value}</span>
-                  <span className="text-[10px] text-slate-400">{s.unit}</span>
-                </div>
-              </div>
-            ))}
+            <div className="absolute left-[60px] top-[130px] -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <Coffee className="w-3.5 h-3.5" style={{ color: '#7D4141' }} />
+            </div>
+            <div className="absolute left-[90px] top-[130px] -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <Flame className="w-3.5 h-3.5" style={{ color: '#FE5196' }} />
+            </div>
           </div>
         </div>
 
-        {/* Daily progress bar */}
-        <div className="mt-4">
-          <div className="flex justify-between text-xs text-slate-400 mb-1.5">
-            <span>已喝 1,350 ml</span>
-            <span>目标 2,000 ml</span>
+        {/* 2x2 数据网格 */}
+        <div className="grid grid-cols-2 gap-3 mb-2">
+          {/* 卡片 1: 水分 */}
+          <div className="glass-inner p-3 rounded-xl">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Droplet className="w-3.5 h-3.5" style={{ color: '#2895FF' }} />
+              <span className="text-xs font-medium text-slate-600">总饮量</span>
+            </div>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-xl font-bold" style={{ color: '#2895FF' }}>{todayStats.totalVolume.toLocaleString()}</span>
+              <span className="text-xs text-slate-400 font-medium">ml</span>
+            </div>
           </div>
-          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full"
-              style={{ width: '68%', background: 'linear-gradient(90deg, #3b82f6, #06b6d4)' }} />
+
+          {/* 卡片 2: 咖啡因 */}
+          <div className="glass-inner p-3 rounded-xl">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Coffee className="w-3.5 h-3.5" style={{ color: '#7D4141' }} />
+              <span className="text-xs font-medium text-slate-600">咖啡因</span>
+            </div>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-xl font-bold" style={{ color: '#7D4141' }}>{todayStats.totalCaffeine.toLocaleString()}</span>
+              <span className="text-xs text-slate-400 font-medium">mg</span>
+            </div>
+          </div>
+
+          {/* 卡片 3: 热量 */}
+          <div className="glass-inner p-3 rounded-xl">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Flame className="w-3.5 h-3.5" style={{ color: '#FE5196' }} />
+              <span className="text-xs font-medium text-slate-600">热量</span>
+            </div>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-xl font-bold" style={{ color: '#FE5196' }}>{todayStats.totalCalories.toLocaleString()}</span>
+              <span className="text-xs text-slate-400 font-medium">kcal</span>
+            </div>
+          </div>
+
+          {/* 卡片 4: 糖分 */}
+          <div className="glass-inner p-3 rounded-xl">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Zap className="w-3.5 h-3.5 text-purple-500" />
+              <span className="text-xs font-medium text-slate-600">糖分</span>
+            </div>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-xl font-bold text-purple-500">{todayStats.totalSugar.toLocaleString()}</span>
+              <span className="text-xs text-slate-400 font-medium">g</span>
+            </div>
           </div>
         </div>
       </div>
@@ -196,38 +209,34 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
       {/* Quick Actions */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "扫描包装", icon: Camera,     bg: "rgba(255, 255, 255, 0.5)", color: "#3b82f6", border: "rgba(255, 255, 255, 0.4)", onClick: onScanClick },
-          { label: "选择杯子", icon: GlassWater,  bg: "rgba(255, 255, 255, 0.5)", color: "#06b6d4", border: "rgba(255, 255, 255, 0.4)", onClick: onViewCupsClick },
-          { label: "手动添加", icon: PenLine,     bg: "rgba(255, 255, 255, 0.5)", color: "#a855f7", border: "rgba(255, 255, 255, 0.4)", onClick: onAddClick },
+          { label: "扫描包装", emoji: "📷", onClick: onScanClick },
+          { label: "选择杯子", emoji: "🥤", onClick: onViewCupsClick },
+          { label: "手动添加", emoji: "✏️", onClick: onAddClick },
         ].map(a => (
           <button
             key={a.label}
             onClick={a.onClick}
-            className="relative p-4 flex flex-col items-center gap-3 active:scale-95 transition-all duration-300"
-            style={{ background: a.bg, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: `1px solid ${a.border}`, boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}
+            className="glass-card relative p-4 flex flex-col items-center gap-3 active:scale-95 transition-all duration-300 rounded-[1.25rem] border border-white/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500"
           >
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-              style={{ background: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)' }}>
-              <a.icon size={22} style={{ color: a.color }} />
+            <div className="glass-inner w-12 h-12 rounded-2xl flex items-center justify-center text-2xl">
+              {a.emoji}
             </div>
-            <span className="text-xs font-semibold text-center" style={{ color: a.color }}>{a.label}</span>
+            <span className="text-xs font-semibold text-center text-slate-700">{a.label}</span>
           </button>
         ))}
       </div>
 
       {/* AI Insight */}
-      <div className="p-4 relative overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
+      <div className="glass-card p-4 relative overflow-hidden rounded-[1.25rem] border border-white/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center flex-shrink-0 shadow-sm"
-            style={{ backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
-            <TrendingUp size={18} className="text-violet-500" />
+          <div className="glass-inner w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl">
+            💡
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-sm font-bold text-violet-700">AI 洞察</span>
-              <span className="text-[10px] px-2 py-0.5 bg-white/80 rounded-full text-violet-500 font-semibold shadow-sm flex items-center gap-1"
-                style={{ backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
-                <Sparkles size={9} /> 新
+              <span className="glass-inner text-[10px] px-2 py-0.5 rounded-full text-violet-500 font-semibold flex items-center gap-1">
+                ✨ 新
               </span>
             </div>
             <p className="text-xs text-violet-600 leading-relaxed font-medium">
@@ -247,14 +256,14 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
         </div>
         <div className="flex flex-col gap-3">
           {recentDrinks.map(drink => (
-            <div key={drink.id} className="px-4 py-3.5 flex items-center gap-4" style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
+            <div key={drink.id} className="glass-card px-4 py-3.5 flex items-center gap-4 rounded-[1.25rem] border border-white/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500">
+              <div className="glass-inner w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
                 {drink.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="text-sm font-bold text-foreground truncate">{drink.name}</p>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0" style={{ background: 'rgba(255, 255, 255, 0.8)', color: drink.accent, backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
+                  <span className="glass-inner text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0" style={{ color: drink.accent }}>
                     {drink.category}
                   </span>
                 </div>
@@ -280,10 +289,15 @@ export function HomeScreen({ onScanClick, onAddClick, onViewAllRecordsClick, onV
         <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
           {favCups.map(cup => (
             <div key={cup.id}
-              className="flex-shrink-0 p-4 flex flex-col items-center gap-2.5 w-28 cursor-pointer active:scale-95 transition-transform"
-              style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-                style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}>
+              className="glass-card flex-shrink-0 p-4 flex flex-col items-center gap-2.5 w-28 cursor-pointer active:scale-95 transition-transform rounded-[1.25rem] border border-white/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500"
+              onClick={() => onUseCupClick({
+                id: cup.id,
+                name: cup.name,
+                capacity: cup.capacity,
+                icon: cup.icon,
+              })}
+            >
+              <div className="glass-inner w-12 h-12 rounded-2xl flex items-center justify-center text-2xl">
                 {cup.icon}
               </div>
               <div className="text-center">

@@ -1,26 +1,73 @@
 "use client"
 
 import { useState } from "react"
-import { Clock, Tag, FileText, ChevronDown, CheckCircle2 } from "lucide-react"
+import { Clock, ChevronDown, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useData } from "@/lib/data-context"
 
 const drinkTypes = ["水", "咖啡", "茶饮", "果汁", "奶茶", "碳酸", "能量", "酒精", "自定义"]
-const tags = ["早餐", "午餐", "晚餐", "健身前", "健身后", "工作中", "放松"]
 
-const nutritionFields = [
-  { label: "容量 (ml)",    key: "volume",   color: "#3b82f6", bg: "#eff6ff", placeholder: "350",  defaultVal: "350" },
-  { label: "热量 (kcal)", key: "calories",  color: "#f43f5e", bg: "#fff1f2", placeholder: "0",    defaultVal: "15" },
-  { label: "糖分 (g)",    key: "sugar",     color: "#ca8a04", bg: "#fefce8", placeholder: "0",    defaultVal: "0" },
-  { label: "咖啡因 (mg)", key: "caffeine",  color: "#8b5cf6", bg: "#fdf4ff", placeholder: "0",    defaultVal: "150" },
-]
+const categoryConfig: Record<string, { icon: string, accent_color: string }> = {
+  "水": { icon: "💧", accent_color: "#3b82f6" },
+  "咖啡": { icon: "☕", accent_color: "#f97316" },
+  "茶饮": { icon: "🍵", accent_color: "#10b981" },
+  "果汁": { icon: "🍹", accent_color: "#a855f7" },
+  "奶茶": { icon: "🧋", accent_color: "#d97706" },
+  "碳酸": { icon: "🥤", accent_color: "#ca8a04" },
+  "能量": { icon: "⚡", accent_color: "#ec4899" },
+  "酒精": { icon: "🍺", accent_color: "#64748b" },
+  "自定义": { icon: "🥛", accent_color: "#0ea5e9" },
+}
 
-export function AddRecordScreen() {
+interface AddRecordScreenProps {
+  onBack?: () => void
+}
+
+export function AddRecordScreen({ onBack }: AddRecordScreenProps) {
   const [selectedType, setSelectedType] = useState("咖啡")
-  const [selectedTags, setSelectedTags] = useState<string[]>(["工作中"])
-  const [values, setValues] = useState({ volume: "350", calories: "15", sugar: "0", caffeine: "150" })
+  const [brand, setBrand] = useState("星巴克")
+  const [name, setName] = useState("馥芮白")
+  const [volume, setVolume] = useState("350")
+  const [calories, setCalories] = useState("15")
+  const [sugar, setSugar] = useState("0")
+  const [caffeine, setCaffeine] = useState("150")
+  const [time, setTime] = useState("14:30")
+  const [saving, setSaving] = useState(false)
+  
+  const { addDrinkRecord } = useData()
 
-  const toggleTag = (t: string) =>
-    setSelectedTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      const config = categoryConfig[selectedType]
+      
+      const drinkTime = new Date()
+      const [hours, minutes] = time.split(':').map(Number)
+      drinkTime.setHours(hours, minutes, 0, 0)
+
+      await addDrinkRecord({
+        name,
+        brand: brand || undefined,
+        volume: parseInt(volume) || 0,
+        calories: parseInt(calories) || 0,
+        sugar: parseFloat(sugar) || 0,
+        caffeine: parseInt(caffeine) || 0,
+        category: selectedType,
+        icon: config.icon,
+        accent_color: config.accent_color,
+        drink_time: drinkTime.toISOString(),
+      })
+
+      if (onBack) {
+        onBack()
+      }
+    } catch (error) {
+      console.error('Failed to save record:', error)
+      alert('保存失败，请重试')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6 pb-4">
@@ -57,7 +104,8 @@ export function AddRecordScreen() {
           <input
             className="input-bright w-full px-4 py-3 text-sm"
             placeholder="例：星巴克、瑞幸咖啡..."
-            defaultValue="星巴克"
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -65,7 +113,8 @@ export function AddRecordScreen() {
           <input
             className="input-bright w-full px-4 py-3 text-sm"
             placeholder="例：美式咖啡、柠檬水..."
-            defaultValue="馥芮白"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
       </div>
@@ -74,18 +123,23 @@ export function AddRecordScreen() {
       <div className="bright-card p-4 flex flex-col gap-3">
         <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">营养信息</label>
         <div className="grid grid-cols-2 gap-3">
-          {nutritionFields.map(f => (
-            <div key={f.key}
+          {[
+            { label: "容量 (ml)",    value: volume,   onChange: setVolume,   color: "#3b82f6", bg: "#eff6ff", placeholder: "350" },
+            { label: "热量 (kcal)", value: calories,  onChange: setCalories,  color: "#f43f5e", bg: "#fff1f2", placeholder: "0" },
+            { label: "糖分 (g)",    value: sugar,     onChange: setSugar,     color: "#ca8a04", bg: "#fefce8", placeholder: "0" },
+            { label: "咖啡因 (mg)", value: caffeine,  onChange: setCaffeine,  color: "#8b5cf6", bg: "#fdf4ff", placeholder: "0" },
+          ].map(f => (
+            <div key={f.label}
               className="rounded-2xl p-3.5 flex flex-col gap-2"
               style={{ background: f.bg }}>
               <label className="text-xs font-semibold" style={{ color: f.color }}>{f.label}</label>
               <input
                 type="number"
                 className="w-full bg-white rounded-xl px-3 py-2 text-sm font-bold border-0 focus:outline-none focus:ring-2"
-                style={{ color: f.color, focusRingColor: f.color }}
+                style={{ color: f.color }}
                 placeholder={f.placeholder}
-                value={values[f.key as keyof typeof values]}
-                onChange={e => setValues(prev => ({ ...prev, [f.key]: e.target.value }))}
+                value={f.value}
+                onChange={e => f.onChange(e.target.value)}
               />
             </div>
           ))}
@@ -100,44 +154,10 @@ export function AddRecordScreen() {
           <input
             type="time"
             className="input-bright w-full pl-10 pr-4 py-3 text-sm"
-            defaultValue="14:30"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
           />
         </div>
-      </div>
-
-      {/* Tags */}
-      <div className="bright-card p-4 flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <Tag size={13} className="text-slate-400" />
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">场景标签</label>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {tags.map(tag => (
-            <button
-              key={tag}
-              onClick={() => toggleTag(tag)}
-              className={cn(
-                "px-3.5 py-2 rounded-full text-xs font-semibold transition-all",
-                selectedTags.includes(tag) ? "chip-active" : "chip-inactive"
-              )}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Notes */}
-      <div className="bright-card p-4 flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <FileText size={13} className="text-slate-400" />
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">备注</label>
-        </div>
-        <textarea
-          className="input-bright w-full px-4 py-3 text-sm resize-none"
-          placeholder="记录喝时的感受，或特殊情况..."
-          rows={3}
-        />
       </div>
 
       {/* Cup */}
@@ -150,9 +170,13 @@ export function AddRecordScreen() {
       </div>
 
       {/* Submit */}
-      <button className="primary-btn w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold mt-1">
+      <button 
+        onClick={handleSave}
+        disabled={saving}
+        className="primary-btn w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <CheckCircle2 size={18} />
-        保存记录
+        {saving ? "保存中..." : "保存记录"}
       </button>
     </div>
   )

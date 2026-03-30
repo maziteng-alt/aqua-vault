@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Camera, Check, ChevronLeft, Plus, Upload } from "lucide-react"
+import { Camera, Check, ChevronLeft, Plus, Upload, Loader2 } from "lucide-react"
+import { useData } from "@/lib/data-context"
 
 const emojiOptions = ["🐻‍❄️", "🧊", "☕", "🧋", "🍵", "🥤", "🍶", "🫖", "🥛", "💧", "🔥", "🌟"]
 
@@ -10,16 +11,17 @@ const materials = ["316不锈钢", "双层玻璃", "耐热玻璃", "PP 食品级
 
 interface AddCupScreenProps {
   onBack: () => void
-  onSave: (cup: any) => void
 }
 
-export function AddCupScreen({ onBack, onSave }: AddCupScreenProps) {
+export function AddCupScreen({ onBack }: AddCupScreenProps) {
+  const { addCup } = useData()
   const [name, setName] = useState("")
   const [capacity, setCapacity] = useState("500")
   const [selectedEmoji, setSelectedEmoji] = useState("🐻‍❄️")
   const [selectedType, setSelectedType] = useState("保温杯")
   const [selectedMaterial, setSelectedMaterial] = useState("316不锈钢")
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,18 +35,25 @@ export function AddCupScreen({ onBack, onSave }: AddCupScreenProps) {
     }
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) return
-    onSave({
-      name,
-      capacity: parseInt(capacity) || 500,
-      type: selectedType,
-      material: selectedMaterial,
-      icon: selectedEmoji,
-      photo: photoPreview,
-      bg: "#eff6ff",
-      accent: "#3b82f6",
-    })
+    setSaving(true)
+    try {
+      await addCup({
+        name,
+        capacity: parseInt(capacity) || 500,
+        icon: selectedEmoji,
+        accent_color: "#3b82f6",
+        background_color: "#eff6ff",
+        is_favorite: true,
+      })
+      onBack()
+    } catch (error) {
+      console.error('Failed to save cup:', error)
+      alert('保存失败：' + (error as any)?.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -194,15 +203,24 @@ export function AddCupScreen({ onBack, onSave }: AddCupScreenProps) {
       {/* Save Button */}
       <button
         onClick={handleSave}
-        disabled={!name.trim()}
+        disabled={!name.trim() || saving}
         className={`w-full py-4 rounded-2xl font-bold text-white transition-all flex items-center justify-center gap-2 ${
-          name.trim()
+          name.trim() && !saving
             ? "bg-gradient-to-r from-blue-500 to-blue-600 active:scale-95"
             : "bg-slate-300 cursor-not-allowed"
         }`}
       >
-        <Check size={18} />
-        保存杯子
+        {saving ? (
+          <>
+            <Loader2 size={18} className="animate-spin" />
+            保存中...
+          </>
+        ) : (
+          <>
+            <Check size={18} />
+            保存杯子
+          </>
+        )}
       </button>
     </div>
   )
