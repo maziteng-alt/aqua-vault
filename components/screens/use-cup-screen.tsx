@@ -105,28 +105,36 @@ export function UseCupScreen({ cup, onBack }: UseCupScreenProps) {
       {/* Volume Adjustment */}
       <div className="bright-card p-5">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">饮用量</p>
-        <div className="flex items-center justify-center gap-6">
-          <button
-            onClick={() => adjustVolume(-50)}
-            className="w-14 h-14 rounded-2xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 transition-all"
-          >
-            <Minus size={24} className="text-slate-600" />
-          </button>
-          
-          <div className="text-center">
-            <span className="text-4xl font-extrabold text-blue-500">{volume}</span>
-            <span className="text-lg text-slate-400 ml-1">ml</span>
-          </div>
-          
-          <button
-            onClick={() => adjustVolume(50)}
-            className="w-14 h-14 rounded-2xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 transition-all"
-          >
-            <Plus size={24} className="text-slate-600" />
-          </button>
+        
+        <div className="text-center mb-6">
+          <span className="text-4xl font-extrabold text-blue-500">{volume}</span>
+          <span className="text-lg text-slate-400 ml-1">ml</span>
         </div>
         
-        <div className="flex justify-center gap-2 mt-4">
+        {/* Slider */}
+        <div className="relative mb-4">
+          <div className="flex justify-between items-end gap-1 overflow-x-auto pb-2">
+            {[50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1500, 1800, 2000].map((value) => {
+              const isActive = volume === value
+              const isVisible = value <= 1000 || value % 200 === 0
+              return (
+                <div key={value} className="flex-shrink-0 flex flex-col items-center">
+                  <div 
+                    onClick={() => setVolume(value)}
+                    className={`w-3 transition-all cursor-pointer ${isActive ? 'h-12 bg-blue-500' : 'h-8 bg-slate-200'}`}
+                  />
+                  {isVisible && (
+                    <span className={`text-xs mt-1 ${isActive ? 'text-blue-500 font-bold' : 'text-slate-400'}`}>
+                      {value}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        
+        <div className="flex justify-center gap-2 mt-2">
           {[50, 100, 200, cup.capacity].map((preset) => (
             <button
               key={preset}

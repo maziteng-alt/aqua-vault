@@ -124,8 +124,9 @@
 @layer utilities {
   /* Bright card */
   .bright-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f8;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 248, 0.8);
     border-radius: 1.25rem;
     box-shadow: 0 2px 12px rgba(59, 130, 246, 0.06), 0 1px 3px rgba(0,0,0,0.04);
   }
