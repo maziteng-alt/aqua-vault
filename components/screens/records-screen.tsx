@@ -153,7 +153,7 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-            <div className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-20 border border-white/60 flex flex-col justify-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
+            <div className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-16 border border-white/60 flex flex-col justify-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
               <span className="text-[10px] text-slate-600 font-medium mb-0.5">总计</span>
               <div className="flex items-baseline gap-0.5">
                 <span className="text-base font-bold text-slate-800">{dailyStats.totalCount}</span>
@@ -162,7 +162,7 @@ export function RecordsScreen({ onAddClick }: RecordsScreenProps) {
             </div>
             
             {dailyStats.topCategories.map((cat, idx) => (
-              <div key={idx} className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-20 border border-white/60 flex justify-between items-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
+              <div key={idx} className="flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-md p-2 w-16 border border-white/60 flex justify-between items-center shadow-[0_4px_16px_0_rgba(31,38,135,0.03)]">
                 <div>
                   <span className="text-[10px] text-slate-600 font-medium mb-0.5 block">{cat.category}</span>
                   <div className="flex items-baseline gap-0.5">
