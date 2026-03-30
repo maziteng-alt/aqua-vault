@@ -113,15 +113,16 @@ export function UseCupScreen({ cup, onBack }: UseCupScreenProps) {
         
         {/* Slider */}
         <div className="relative mb-4">
-          <div className="flex justify-between items-center gap-2 overflow-x-auto">
+          <div className="flex justify-between items-end gap-1 overflow-x-auto">
             {Array.from({ length: 15 }, (_, index) => {
               const value = 50 + index * 33 // 50ml 到 500ml，15个柱子
+              const heightClass = ['h-6', 'h-7', 'h-8', 'h-9', 'h-10', 'h-11', 'h-12', 'h-14', 'h-16', 'h-18', 'h-20', 'h-22', 'h-24', 'h-26', 'h-28'][index] || 'h-6'
               const isActive = Math.abs(volume - value) <= 25 // 选择最近的柱子
               return (
                 <div key={value} className="flex-shrink-0 flex flex-col items-center">
                   <div 
                     onClick={() => setVolume(value)}
-                    className={`w-1.5 transition-all cursor-pointer ${isActive ? 'h-10 bg-blue-500' : 'h-6 bg-slate-300'}`}
+                    className={`w-1.5 ${heightClass} rounded-full transition-all cursor-pointer ${isActive ? 'bg-blue-500' : 'bg-slate-300'}`}
                   />
                 </div>
               )
